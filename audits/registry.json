@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "scopes": [
+    {
+      "path": ".",
+      "owner": "governance-owner",
+      "contract": "AGENTS.md",
+      "last_reviewed": "2026-06-15",
+      "next_review": "2026-09-13",
+      "alignment": "current",
+      "notes": "Bootstrapped repository contract."
+    }
+  ]
+}

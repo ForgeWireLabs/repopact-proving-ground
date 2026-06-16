@@ -1,0 +1,16 @@
+{
+  "$schema": "../../schemas/evidence-run.schema.json",
+  "id": "20260615-202635-unitconv-tests",
+  "timestamp": "2026-06-15T20:26:35-05:00",
+  "work_item": "001",
+  "result": "passed",
+  "commands": [
+    {
+      "command": "python -m unittest discover -s tests",
+      "exit_code": 0,
+      "summary": "8 tests pass: temperature C/F/K and length m/km/ft/mi conversions, including round-trips and unknown-unit handling."
+    }
+  ],
+  "artifacts": [],
+  "environment": {"python": "3.12", "platform": "win32"}
+}

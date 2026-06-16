@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "scopes": [
+    {
+      "id": "governance",
+      "paths": [
+        "AGENTS.md",
+        "governance/**",
+        "schemas/**"
+      ],
+      "owner": "governance-owner"
+    },
+    {
+      "id": "app",
+      "paths": [
+        "unitconv.py",
+        "tests/**"
+      ],
+      "owner": "app-owner"
+    }
+  ],
+  "roles": [
+    {
+      "id": "governance-owner",
+      "description": "Maintains the pact and schemas.",
+      "scopes": [
+        "governance"
+      ]
+    },
+    {
+      "id": "app-owner",
+      "description": "Owns the unitconv application code and tests.",
+      "scopes": [
+        "app"
+      ]
+    }
+  ],
+  "concurrency": {
+    "enforce_disjoint_active_scopes": true
+  }
+}

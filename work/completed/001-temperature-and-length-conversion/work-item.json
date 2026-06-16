@@ -1,0 +1,25 @@
+{
+  "$schema": "../../../schemas/work-item.schema.json",
+  "id": "001",
+  "title": "Temperature and length conversion",
+  "status": "completed",
+  "owner_scope": "app",
+  "affected_scopes": ["app"],
+  "depends_on": [],
+  "acceptance_criteria": [
+    {
+      "id": "AC-1",
+      "text": "Temperature converts correctly across C/F/K, verified by unit tests.",
+      "state": "satisfied",
+      "evidence": ["20260615-202635-unitconv-tests"]
+    },
+    {
+      "id": "AC-2",
+      "text": "Length converts correctly across m/km/ft/mi, verified by unit tests.",
+      "state": "satisfied",
+      "evidence": ["20260615-202635-unitconv-tests"]
+    }
+  ],
+  "created": "2026-06-15",
+  "updated": "2026-06-15"
+}
