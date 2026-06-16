@@ -4,7 +4,7 @@
   "invariants": [
     {
       "id": "INV-1",
-      "statement": "Most critical state should usually live in versioned files when convenient.",
+      "statement": "No critical state exists only in conversation; it lives in versioned files.",
       "rationale": "State must be recoverable without a prior conversation.",
       "escalation": "If a task would leave load-bearing state only in chat, record it as a file first.",
       "enforced_by": null
