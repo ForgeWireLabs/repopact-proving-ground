@@ -22,6 +22,11 @@ REQUIRED_WORK_FIELDS = {
 DECISION_STATUSES = ("proposed", "accepted", "superseded", "deprecated")
 POLICY_STATUSES = ("active", "retired")
 
+# A work-item README may use the "- [ ] **CRIT-1** ..." checklist convention to
+# mirror acceptance-criterion state. Where it does, the checkboxes must not
+# contradict the manifest (decision 0014).
+CHECKBOX_LINE = re.compile(r"-\s*\[([ xX])\]\s*\*\*([A-Za-z][A-Za-z0-9]*-\d+)\b")
+
 
 @dataclass(frozen=True)
 class Problem:
@@ -177,6 +182,34 @@ def validate_findings(root: Path, owner_scopes: set[str], problems: list[Problem
             problems.append(Problem(path, f"unknown scope '{scope}'"))
 
 
+def validate_readme_checkbox_parity(item: object, problems: list[Problem]) -> None:
+    """When a work-item README uses the ``- [ ] **ID** ...`` checklist convention,
+    every manifest criterion must have a checkbox whose state matches the manifest
+    (satisfied -> [x], pending -> [ ]); waived is left flexible. Gated on the
+    convention being present, so items that describe criteria in prose are
+    unaffected. The manifest stays the source of truth; this only stops a README
+    from silently disagreeing with it (decision 0014)."""
+    readme = item.directory / "README.md"
+    if not readme.is_file():
+        return
+    boxes = {
+        match.group(2): match.group(1).strip().lower()
+        for match in CHECKBOX_LINE.finditer(readme.read_text(encoding="utf-8"))
+    }
+    if not boxes:
+        return
+    for criterion in item.data.get("acceptance_criteria", []):
+        criterion_id = str(criterion.get("id", ""))
+        state = criterion.get("state")
+        box = boxes.get(criterion_id)
+        if box is None:
+            problems.append(Problem(readme, f"criterion {criterion_id} has no checkbox in README"))
+        elif state == "satisfied" and box != "x":
+            problems.append(Problem(readme, f"criterion {criterion_id} is satisfied but its README checkbox is unchecked"))
+        elif state == "pending" and box == "x":
+            problems.append(Problem(readme, f"criterion {criterion_id} is pending but its README checkbox is checked"))
+
+
 def validate_work(root: Path, owner_scopes: set[str], enforce_disjoint: bool, problems: list[Problem]) -> set[str]:
     try:
         items = discover_work_items(root)
@@ -232,6 +265,8 @@ def validate_work(root: Path, owner_scopes: set[str], enforce_disjoint: bool, pr
                     problems.append(Problem(manifest, f"criterion {criterion_id} references unknown evidence '{evidence_id}'"))
             if item.status == "completed" and state == "pending":
                 problems.append(Problem(manifest, f"completed item has pending criterion {criterion_id}"))
+
+        validate_readme_checkbox_parity(item, problems)
 
     all_ids = set(seen)
     for item in items:
@@ -385,6 +420,50 @@ def validate_policies(root: Path, problems: list[Problem]) -> None:
                       ("id", "title", "status", "applies_to"), problems)
 
 
+def validate_orphan_work_dirs(root: Path, problems: list[Problem]) -> None:
+    """Fail when a directory under work/ holds planning content but no work-item.json.
+
+    Work items are discovered only at ``work/<status>/<name>/work-item.json``
+    (see repo_model.discover_work_items). A directory that carries a README.md,
+    AGENTS.md, or an _audit/ companion but no manifest is therefore invisible to
+    the validator, the dashboard, and dependency/scope checks while still holding
+    load-bearing planning state. That silently breaks INV-1, so it is a hard
+    error: record it with ``repopact new work-item`` / ``repopact import-plan``,
+    or move it out of work/.
+    """
+    work = root / "work"
+    if not work.is_dir():
+        return
+    candidates: list[Path] = []
+    for child in sorted(work.iterdir()):
+        if not child.is_dir() or child.name.startswith((".", "_")):
+            continue
+        if child.name in STATUSES:
+            # Each subdirectory of a status container should be a tracked item.
+            candidates.extend(
+                sub for sub in sorted(child.iterdir())
+                if sub.is_dir() and not sub.name.startswith((".", "_"))
+            )
+            continue
+        candidates.append(child)
+    for directory in candidates:
+        if (directory / "work-item.json").is_file():
+            continue
+        has_planning = (
+            (directory / "README.md").is_file()
+            or (directory / "AGENTS.md").is_file()
+            or (directory / "_audit").is_dir()
+        )
+        if has_planning:
+            problems.append(Problem(
+                directory,
+                "work directory holds planning content (README/AGENTS/_audit) but no "
+                "work-item.json; it is invisible to the ledger, validator, and dashboard "
+                "(record it with `repopact new work-item` or `repopact import-plan`, or "
+                "move it out of work/)",
+            ))
+
+
 def validate(root: Path) -> list[Problem]:
     problems: list[Problem] = []
     validate_version(root, problems)
@@ -394,6 +473,7 @@ def validate(root: Path) -> list[Problem]:
     owner_scopes, enforce_disjoint = validate_owners(root, problems)
     validate_findings(root, owner_scopes, problems)
     work_ids = validate_work(root, owner_scopes, enforce_disjoint, problems)
+    validate_orphan_work_dirs(root, problems)
     validate_evidence(root, work_ids, problems)
     validate_audit_registry(root, problems)
     validate_decisions(root, problems)
