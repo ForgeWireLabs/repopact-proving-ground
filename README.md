@@ -58,9 +58,21 @@ notebook:
 - [formal-model.md](https://github.com/ForgeWireLabs/repopact/blob/main/research/formal-model.md)
   and [paper.md](https://github.com/ForgeWireLabs/repopact/blob/main/research/paper.md).
 
-**PactBench**, the runnable benchmark suite (pre-registered tasks + harnesses measuring
-whether enforcement reduces silent guarantee drift), currently lives in the RepoPact repo
-under [`benchmarks/`](https://github.com/ForgeWireLabs/repopact/tree/main/benchmarks).
+**PactBench** — the runnable benchmark suite — lives **here** in [`benchmarks/`](benchmarks/):
+pre-registered tasks (24, across six security classes plus adversarial evidence-fabrication and
+context-injection), ten real fixtures, a model-agnostic harness (`benchmarks/harness/` —
+`MockRunner` + a subprocess `RealRunner`), and an **S5 drift harness** (`benchmarks/drift/`).
+The benchmark *protocol* it implements (hypotheses, falsification criteria, threats) is defined
+in RepoPact's [`research/`](https://github.com/ForgeWireLabs/repopact/tree/main/research). This
+is the ecosystem split: RepoPact defines what to measure; the Proving Ground runs it.
+
+```bash
+python benchmarks/harness/run.py --selftest     # PactBench pipeline (deterministic mock)
+python benchmarks/drift/harness.py --selftest   # S5 drift detection vs convention files
+```
+
+Real cross-model result bundles are operator-gated (set `REPOPACT_AGENT_CMD` + provide API
+keys for the `RealRunner`).
 
 ## Relationship to RepoPact and ForgeWire Labs
 
