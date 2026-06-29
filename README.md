@@ -14,12 +14,18 @@ demo: if a guarantee can be silently weakened, this is where it shows up.
 - **A real subject under test.** `unitconv.py` is actual working code with real work items,
   evidence, and decisions — not a mock. Its job is to be governed, and to be attacked.
 - **Itself a governed RepoPact repo.** Its own contracts (`AGENTS.md`, `governance/`,
-  `work/`, `evidence/`, `audits/`) are validated by RepoPact, so the lab eats its own dog
-  food while testing the kernel.
+  `work/`, `evidence/`, `audits/`) are validated by RepoPact, so the lab is governed by the same contract discipline it is testing.
 - **Run against the *packaged* product.** It consumes RepoPact from PyPI (pinned in
   [`requirements-repopact.txt`](requirements-repopact.txt)), not a source checkout — so it
   tests exactly what an adopter receives, on a clean install.
 
+
+## Relationship to `AGENTS.md`
+
+`AGENTS.md` tells an agent how to behave. RepoPact enforces and records whether the work respected the contract.
+
+In this repository, `AGENTS.md` is the local instruction surface. RepoPact is the durable record
+around it: scoped authority, work items, evidence, audits, drift checks, and validation.
 ## Why it exists
 
 Capable models still produce unreliable systems. RepoPact's claim is that a thin layer of
@@ -48,7 +54,7 @@ python -m unittest discover -s tests       # exercise unitconv
 ## Where the evidence lives
 
 The pre-registered experiment protocol, the findings register (F-001…F-013), the raw
-captures, the formal model, and the paper are kept in RepoPact's public `research/` lab
+captures, the formal model, and the current paper are kept in RepoPact's public `research/` lab
 notebook:
 
 - [protocol.md](https://github.com/ForgeWireLabs/repopact/blob/main/research/protocol.md) —
@@ -76,7 +82,7 @@ keys for the `RealRunner`).
 
 ## Relationship to RepoPact and ForgeWire Labs
 
-RepoPact (the standard) defines the contract language, the reference validator, and the
-benchmark protocol. This Proving Ground exercises that standard under adversarial agent
-pressure and produces the reproducible evidence behind RepoPact's claims. Both are part of
+RepoPact (the standard) defines the contract language, the reference validator, the published
+conformance suite, and the benchmark protocol. This Proving Ground exercises that standard
+under adversarial agent pressure and produces the reproducible evidence behind RepoPact's claims. Both are part of
 [ForgeWire Labs](https://github.com/ForgeWireLabs) — inspectable agentic infrastructure.
