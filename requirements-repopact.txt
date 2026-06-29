@@ -1,4 +1,4 @@
 # RepoPact governance tooling, consumed from PyPI instead of vendored.
 # Validate with:  python -m repopact_cli validate   (or `repopact validate` if on PATH).
 # schemas/ stay in-repo — RepoPact validates against this repository's own contracts.
-repopact==2.0.1
+repopact==2.0.2
