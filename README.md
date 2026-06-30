@@ -5,7 +5,7 @@
 
 This repository is the adversarial lab for [RepoPact](https://github.com/ForgeWireLabs/repopact).
 It is a small, throwaway-but-genuinely-working project (`unitconv.py`, a unit-converter CLI)
-that **adopts RepoPact from PyPI** and is then driven across every RepoPact primitive —
+that **adopts RepoPact from a pinned upstream package** and is then driven across every RepoPact primitive —
 including cases designed specifically to break the architecture. The point is evidence, not a
 demo: if a guarantee can be silently weakened, this is where it shows up.
 
@@ -15,9 +15,10 @@ demo: if a guarantee can be silently weakened, this is where it shows up.
   evidence, and decisions — not a mock. Its job is to be governed, and to be attacked.
 - **Itself a governed RepoPact repo.** Its own contracts (`AGENTS.md`, `governance/`,
   `work/`, `evidence/`, `audits/`) are validated by RepoPact, so the lab is governed by the same contract discipline it is testing.
-- **Run against the *packaged* product.** It consumes RepoPact from PyPI (pinned in
-  [`requirements-repopact.txt`](requirements-repopact.txt)), not a source checkout — so it
-  tests exactly what an adopter receives, on a clean install.
+- **Run against the *packaged* product.** It consumes RepoPact from a pinned package reference
+  ([`requirements-repopact.txt`](requirements-repopact.txt)), not a source checkout — so it
+  tests exactly what an adopter receives, on a clean install. Between package releases this may
+  pin an upstream commit.
 
 
 ## Relationship to `AGENTS.md`
@@ -46,7 +47,7 @@ fixed upstream, and re-verified from a rebuilt package.
 ## Run it
 
 ```bash
-pip install -r requirements-repopact.txt   # installs RepoPact from PyPI
+pip install -r requirements-repopact.txt   # installs the pinned RepoPact package
 repopact validate                          # validate this repo's own contracts
 python -m unittest discover -s tests       # exercise unitconv
 ```

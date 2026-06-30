@@ -1,4 +1,4 @@
-# RepoPact governance tooling, consumed from PyPI instead of vendored.
+# RepoPact governance tooling, consumed as a pinned upstream package instead of vendored.
 # Validate with:  python -m repopact_cli validate   (or `repopact validate` if on PATH).
 # schemas/ stay in-repo — RepoPact validates against this repository's own contracts.
-repopact==2.0.2
+repopact @ git+https://github.com/ForgeWireLabs/repopact@d1d5f812b66350bc1c5514c1c92971f2cf4bebd3
