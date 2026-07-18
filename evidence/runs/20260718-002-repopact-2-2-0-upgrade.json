@@ -1,0 +1,17 @@
+{
+  "$schema": "../../schemas/evidence-run.schema.json",
+  "id": "20260718-002-repopact-2-2-0-upgrade",
+  "timestamp": "2026-07-18T19:47:35Z",
+  "work_item": "002",
+  "result": "passed",
+  "provenance": "concrete",
+  "commands": [
+    {"command": "python -m pip install --no-cache-dir -r requirements-repopact.txt", "exit_code": 0, "summary": "Confirmed exact public dependency repopact==2.2.0 is installed."},
+    {"command": "python -m repopact_cli dashboard --root . && python -m repopact_cli validate --root .", "exit_code": 0, "summary": "Generated the canonical dashboard and passed packaged RepoPact 2.2.0 validation."},
+    {"command": "python -m unittest discover -s tests -v", "exit_code": 0, "summary": "All 8 unit-conversion tests passed."},
+    {"command": "python benchmarks/harness/run.py --selftest", "exit_code": 0, "summary": "All 24 PactBench deterministic tasks passed their expected baseline-versus-RepoPact asymmetry."},
+    {"command": "python benchmarks/drift/harness.py --selftest", "exit_code": 0, "summary": "Drift selftest passed after refreshing the canonical dashboard after setup mutations, preventing the new fixpoint from masking the intended mutation signal and preserving M7 as an honest semantic blind spot."}
+  ],
+  "artifacts": ["requirements-repopact.txt", "README.md", "audits/reports/dashboard.md", "benchmarks/drift/harness.py"],
+  "environment": {"repository": "ForgeWireLabs/repopact-proving-ground", "platform": "Windows", "python": "3.12", "repopact_version": "2.2.0"}
+}

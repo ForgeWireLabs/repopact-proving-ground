@@ -15,10 +15,10 @@ demo: if a guarantee can be silently weakened, this is where it shows up.
   evidence, and decisions — not a mock. Its job is to be governed, and to be attacked.
 - **Itself a governed RepoPact repo.** Its own contracts (`AGENTS.md`, `governance/`,
   `work/`, `evidence/`, `audits/`) are validated by RepoPact, so the lab is governed by the same contract discipline it is testing.
-- **Run against the *packaged* product.** It consumes RepoPact from a pinned package reference
+- **Run against the *packaged* product.** It consumes exact public release
+  `repopact==2.2.0` from a pinned package reference
   ([`requirements-repopact.txt`](requirements-repopact.txt)), not a source checkout — so it
-  tests exactly what an adopter receives, on a clean install. Between package releases this may
-  pin an upstream commit.
+  tests exactly what an adopter receives, on a clean install.
 
 
 ## Relationship to `AGENTS.md`

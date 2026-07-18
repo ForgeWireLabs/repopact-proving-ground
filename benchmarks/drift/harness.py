@@ -29,6 +29,7 @@ if (_scripts / "validate_repo.py").exists():
     sys.path.insert(0, str(_scripts))
 
 import init_repo                       # noqa: E402
+from generate_dashboard import write_dashboard  # noqa: E402
 from validate_repo import validate     # noqa: E402
 
 
@@ -105,6 +106,11 @@ def run() -> list[dict]:
         with tempfile.TemporaryDirectory() as tmp:
             repo = _base_repo(Path(tmp) / "repo")
             fn(repo)
+            # Ledger mutations must refresh their declared derived projection before
+            # measuring the intended drift rule. Otherwise RepoPact 2.2.0 correctly
+            # reports a stale dashboard and masks whether the mutation itself is a
+            # structural violation or an honest blind spot such as M7.
+            write_dashboard(repo)
             problems = validate(repo)
             detected = bool(problems)
             results.append({

@@ -1,7 +1,7 @@
 # Repository Dashboard
 
-> Generated from source records. Do not edit manually.
-> Generated: 2026-06-15
+> Canonically generated from source records. Do not edit manually.
+> Validation fails when this file differs from `repopact dashboard` output.
 > RepoPact spec version: 0.1.0
 
 ## Health
@@ -15,16 +15,17 @@
 | Audit findings | 0 |
 | Decision records | 0 |
 | Policy records | 0 |
-| Evidence runs | 1 |
+| Evidence runs | 2 |
 
 ## Work
 
 | Status | Count |
 | --- | ---: |
+| proposed | 0 |
 | active | 0 |
 | blocked | 0 |
 | deferred | 0 |
-| completed | 1 |
+| completed | 2 |
 
 ## Audit freshness
 
