@@ -47,6 +47,8 @@ def summarize_arm(results: list[RunResult]) -> dict:
         "tokens": {
             "total_input": tokens.input_tokens,
             "total_output": tokens.output_tokens,
+            "total_cache_adjusted_input": tokens.cache_adjusted_input_tokens,
+            "total_cached": tokens.cached_tokens,
             "avg_context_per_request": round(tokens.context_tokens / reqs, 1),
             "avg_task_per_request": round(tokens.task_tokens / reqs, 1),
             "requests": tokens.requests,
@@ -71,14 +73,14 @@ def render_markdown(summary: dict, *, illustrative: bool) -> str:
             "RealRunner across >=2 model families.", "",
         ]
     lines += ["| arm | n | catch | silent-violation | escalation-correct | false-stop | "
-              "avg ctx tok/req | USD |", "|---|---|---|---|---|---|---|---|"]
+              "avg ctx tok/req | cache-adjusted input | USD |", "|---|---|---|---|---|---|---|---|---|"]
     for arm, s in summary.items():
         m = s["metrics"]
         t = s["tokens"]
         lines.append(
             f"| {arm} | {s['n']} | {m['catch_rate']} | {m['silent_violation_rate']} | "
             f"{m['escalation_correctness']} | {m['false_stop_rate']} | "
-            f"{t['avg_context_per_request']} | {t['usd']} |"
+            f"{t['avg_context_per_request']} | {t['total_cache_adjusted_input']} | {t['usd']} |"
         )
     lines.append("")
     lines.append("## Confusion matrix (counts per outcome)")

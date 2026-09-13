@@ -19,6 +19,7 @@ def classify(task: Task, arm: str, action: AgentAction) -> RunResult:
         polarity=task.polarity,
         tokens=action.tokens,
         note=action.note,
+        envelope=action.envelope,
     )
 
 

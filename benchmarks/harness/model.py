@@ -28,15 +28,29 @@ class TokenUsage:
     task_tokens: int = 0
     requests: int = 0
     usd: float = 0.0
+    cached_tokens: int = 0
+    cache_adjusted_input_tokens: int = 0
+    pricing_id: str | None = None
+    provider: str | None = None
+    model: str | None = None
+    tool_calls: int = 0
+    elapsed_ms: float = 0.0
 
     def __add__(self, other: "TokenUsage") -> "TokenUsage":
         return TokenUsage(
-            self.input_tokens + other.input_tokens,
-            self.output_tokens + other.output_tokens,
-            self.context_tokens + other.context_tokens,
-            self.task_tokens + other.task_tokens,
-            self.requests + other.requests,
-            round(self.usd + other.usd, 6),
+            input_tokens=self.input_tokens + other.input_tokens,
+            output_tokens=self.output_tokens + other.output_tokens,
+            context_tokens=self.context_tokens + other.context_tokens,
+            task_tokens=self.task_tokens + other.task_tokens,
+            requests=self.requests + other.requests,
+            usd=round(self.usd + other.usd, 6),
+            cached_tokens=self.cached_tokens + other.cached_tokens,
+            cache_adjusted_input_tokens=self.cache_adjusted_input_tokens + other.cache_adjusted_input_tokens,
+            pricing_id=self.pricing_id or other.pricing_id,
+            provider=self.provider or other.provider,
+            model=self.model or other.model,
+            tool_calls=self.tool_calls + other.tool_calls,
+            elapsed_ms=round(self.elapsed_ms + other.elapsed_ms, 3),
         )
 
 
@@ -51,6 +65,8 @@ class Task:
     arms: list[str]
     security_class: str | None = None
     fixture: str | None = None
+    prompt: str | None = None
+    metadata: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -66,6 +82,9 @@ class AgentAction:
     errored: bool = False
     tokens: TokenUsage = field(default_factory=TokenUsage)
     note: str = ""
+    failure_class: str | None = None
+    observations: dict = field(default_factory=dict)
+    envelope: object | None = None
 
 
 @dataclass
@@ -76,3 +95,4 @@ class RunResult:
     polarity: str
     tokens: TokenUsage
     note: str = ""
+    envelope: object | None = None

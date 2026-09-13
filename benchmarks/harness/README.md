@@ -1,15 +1,15 @@
 # Benchmark harness
 
-Model-agnostic harness for the comparative studies in
-[`../../research/benchmark-protocol.md`](../../research/benchmark-protocol.md). It loads
-pre-registered tasks, runs each in the matched arms (`baseline` = convention-file,
-`repopact` = RepoPact records), grades the outcome against the confusion-matrix taxonomy,
-and reports metrics + token/cost instrumentation.
+Model-agnostic harness for RepoPact's comparative benchmark protocol. It loads frozen
+PactBench tasks, runs matched arms, grades S1/S6a outcomes, and provides the study-neutral
+`RunEnvelope` used by the S2-S6 drivers. Study-specific observations remain outside the
+envelope so recovery, coordination, economy, drift, and injection results are not forced
+into the PactBench confusion matrix.
 
 ## Run it
 
 ```bash
-# Illustrative pipeline check against the 15 pre-registered PactBench tasks (no model):
+# Illustrative pipeline check against the pre-registered PactBench tasks:
 python benchmarks/harness/run.py
 
 # Self-test (asserts the pipeline produces a sane matrix; exits non-zero on failure):
@@ -28,34 +28,43 @@ python benchmarks/harness/run.py --arms baseline,repopact --out report.md
 | `RealRunner` (drive a live agent over a fixture, read post-conditions) | **operator-gated** — needs a model/agent + API keys |
 
 The MockRunner exists so the plumbing is testable without a model. Real results require the
-`RealRunner` across ≥2 model families (work item 022, AC-3); until then no row here is a
-finding.
+RealRunner across at least two model families (work item 022, AC-3); until then no row here
+is a finding.
 
 ## The runner interface
 
-A runner implements `run(task, arm) -> AgentAction`. To add a live model, implement
-`RealRunner.run` in [`runners.py`](runners.py): materialize the arm over the task fixture
-(RepoPact records vs a convention-file `AGENTS.md`), drive the agent with the task prompt,
-then read back post-conditions (diff inspection, `check-frozen` exit code, emitted approval
-requests) per [`../pactbench/TASK-FORMAT.md`](../pactbench/TASK-FORMAT.md) and return an
-`AgentAction`. The grader ([`graders.py`](graders.py)) turns the action into an `Outcome`;
-runners never assign outcomes themselves.
+A runner implements `run(task, arm, study_spec) -> AgentAction`. `RealRunner` sends a
+versioned request (`repopact.real-runner.v1`) to the command named by `REPOPACT_AGENT_CMD`.
+The wrapper must return structured action flags, study observations, model/provider/version
+identity, provenance, raw capture reference, and complete per-request plus aggregate
+telemetry. Missing telemetry is an invalid runner response; it is never converted into
+zeroes. The grader (`graders.py`) turns an action into an `Outcome`; runners never assign
+outcomes themselves.
+
+The common envelope is `repopact.experiment-run.v1`. It records study/case/condition,
+fixture and task-set versions, repetition/seed, model identity, policy/scorer versions,
+completion/failure state, request telemetry, aggregate telemetry, observations, exact
+command, raw capture reference, provenance, and an explicit illustrative classification.
 
 ## Files
 
 | File | Role |
 |---|---|
-| `model.py` | `Task`, `AgentAction`, `RunResult`, `Outcome`, `TokenUsage` |
-| `runners.py` | `MockRunner`, `RealRunner` (gated), `get_runner` |
+| `model.py` | Backward-compatible PactBench types plus expanded telemetry |
+| `execution.py` | Study-neutral run envelope and strict telemetry validation |
+| `run.schema.json` | Machine-readable envelope shape/version |
+| `runners.py` | Versioned `MockRunner`, `RealRunner` (gated), `get_runner` |
+| `registry.py` | Deterministic pre-registration ordering and file digests |
+| `capture.py` | Stable capture layout, classification, and secret checks |
 | `graders.py` | action → outcome classification (polarity-aware) |
 | `report.py` | confusion matrix, metrics, token summary, markdown render |
 | `run.py` | CLI: load → run → grade → report; `--selftest` |
 
 ## Coverage
 
-Today the harness implements the **PactBench (S1/S6a)** and **drift task-loading (S5)**
-plumbing with the mock runner. The longer-horizon studies — S2 (recovery/efficiency on
-SWE-bench Verified / SWE-EVO), S3 (multi-agent coordination), and the full S4 token-economy
-sweep across all context regimes — reuse this scaffolding (loader, arms, instrumentation,
-report) but need the `RealRunner` and additional drivers; they are tracked under work item
-022 AC-1/AC-3.
+Coverage includes the deterministic driver/scorer boundaries for S2 recovery, S3
+coordination, S4 context economy, the existing S5 drift adapter, and S6b injection
+resistance. S2's external beds are pinned by immutable revision and selector manifests;
+materialization is explicit and does not vendor third-party task material. These drivers
+are executable plumbing, not agent-behaviour findings. Live comparative execution remains
+operator-gated on a provisioned runner and model credentials.

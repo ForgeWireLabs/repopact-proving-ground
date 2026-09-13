@@ -41,6 +41,8 @@ def load_tasks(tasks_dir: str) -> list[Task]:
             arms=d.get("arms", ["baseline", "repopact"]),
             security_class=d.get("security_class"),
             fixture=seed.get("fixture"),
+            prompt=d.get("prompt"),
+            metadata={"registered": d.get("registered"), "task_file": name},
         ))
     return tasks
 
@@ -51,7 +53,15 @@ def run_tasks(tasks: list[Task], arms: list[str], runner) -> list:
         for arm in arms:
             if arm not in task.arms:
                 continue
-            action = runner.run(task, arm)
+            try:
+                action = runner.run(task, arm)
+            except Exception as exc:  # invalid live-run contracts become explicit errored runs
+                from model import AgentAction  # noqa: PLC0415
+                action = AgentAction(
+                    errored=True,
+                    failure_class="runner_contract_invalid",
+                    note=f"{type(exc).__name__}: {exc}",
+                )
             results.append(classify(task, arm, action))
     return results
 

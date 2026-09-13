@@ -1,130 +1,231 @@
-"""Agent runners.
-
-A runner takes a (task, arm) and reports what the agent did as an AgentAction. The grader
-turns that into an Outcome. Two runners ship:
-
-- MockRunner: deterministic, no model. Encodes a simple illustrative policy so the harness
-  plumbing and the confusion-matrix reporting can be exercised and self-tested. Its numbers
-  are NOT findings; they exist to prove the pipeline runs.
-- RealRunner: the operator-gated integration point. It is intentionally not implemented
-  here; running it needs a model/agent and API keys the operator provides.
-"""
+"""Model-agnostic runners and the versioned subprocess contract."""
 from __future__ import annotations
 
 import json
 import os
 import subprocess
+from dataclasses import asdict
 
-from model import AgentAction, Task, TokenUsage
+try:
+    from .execution import (
+        REAL_RUNNER_CONTRACT_VERSION, RunEnvelope, EnvelopeValidationError, RUN_SCHEMA_VERSION,
+        ModelIdentity, aggregate_telemetry, parse_token_usage,
+    )
+    from .model import AgentAction, Task, TokenUsage
+except ImportError:  # pragma: no cover - legacy script entry point
+    from execution import (  # type: ignore
+        REAL_RUNNER_CONTRACT_VERSION, RunEnvelope, EnvelopeValidationError, RUN_SCHEMA_VERSION,
+        ModelIdentity, aggregate_telemetry, parse_token_usage,
+    )
+    from model import AgentAction, Task, TokenUsage  # type: ignore
+
+
+class RunnerContractError(ValueError):
+    """A subprocess response is malformed or lacks required telemetry."""
+
+
+def build_request(task: Task, arm: str, study_spec: dict | None = None) -> dict:
+    """Build the versioned request sent to any provider wrapper."""
+    return {
+        "protocol_version": REAL_RUNNER_CONTRACT_VERSION,
+        "task": {
+            "task_id": task.id,
+            "title": task.title,
+            "category": task.category,
+            "polarity": task.polarity,
+            "frozen_surface": task.frozen_surface,
+            "security_class": task.security_class,
+            "fixture": task.fixture,
+            "prompt": task.prompt,
+            "metadata": task.metadata,
+        },
+        "condition": arm,
+        "study_spec": study_spec or {},
+    }
+
+
+def _required_bool(action: dict, name: str) -> bool:
+    if name not in action or not isinstance(action[name], bool):
+        raise RunnerContractError(f"action.{name} must be a boolean")
+    return action[name]
+
+
+def parse_response(payload: object, task: Task, arm: str, *, exact_command: str) -> AgentAction:
+    """Parse a complete RealRunner response without silently zero-filling telemetry."""
+    if not isinstance(payload, dict):
+        raise RunnerContractError("runner response must be a JSON object")
+    if payload.get("protocol_version") != REAL_RUNNER_CONTRACT_VERSION:
+        raise RunnerContractError(f"protocol_version must be {REAL_RUNNER_CONTRACT_VERSION}")
+    status = payload.get("status")
+    if status not in {"completed", "incomplete", "failed"}:
+        raise RunnerContractError("status must be completed, incomplete, or failed")
+    action = payload.get("action")
+    if not isinstance(action, dict):
+        raise RunnerContractError("action must be an object")
+    model = payload.get("model")
+    if not isinstance(model, dict):
+        raise RunnerContractError("model must be an object")
+    for name in ("family", "provider", "version"):
+        if not isinstance(model.get(name), str) or not model[name].strip():
+            raise RunnerContractError(f"model.{name} must be a non-empty string")
+    provenance = payload.get("provenance")
+    if not isinstance(provenance, dict):
+        raise RunnerContractError("provenance must be an object")
+    for name in ("task_set_version", "fixture_version"):
+        if not isinstance(provenance.get(name), str) or not provenance[name].strip():
+            raise RunnerContractError(f"provenance.{name} must be a non-empty string")
+    capture = payload.get("capture")
+    if not isinstance(capture, dict) or not isinstance(capture.get("raw_transcript_ref"), str) or not capture["raw_transcript_ref"].strip():
+        raise RunnerContractError("capture.raw_transcript_ref is required")
+    observations = payload.get("observations")
+    if not isinstance(observations, dict):
+        raise RunnerContractError("observations must be an object")
+    telemetry = payload.get("telemetry")
+    if not isinstance(telemetry, dict):
+        if status == "completed":
+            raise RunnerContractError("telemetry.requests must be an array")
+        telemetry = {"requests": []}
+    if not isinstance(telemetry.get("requests"), list):
+        raise RunnerContractError("telemetry.requests must be an array")
+
+    requests: list[TokenUsage] = []
+    for index, request in enumerate(telemetry["requests"]):
+        try:
+            parsed = parse_token_usage(request, path=f"telemetry.requests[{index}]")
+        except EnvelopeValidationError as exc:
+            raise RunnerContractError(str(exc)) from exc
+        for name in ("provider", "model", "pricing_id"):
+            if getattr(parsed, name) in {None, ""}:
+                raise RunnerContractError(f"telemetry.requests[{index}].{name} is required")
+        requests.append(parsed)
+    if status == "completed" and not requests:
+        raise RunnerContractError("completed response requires per-request telemetry")
+    aggregate_data = telemetry.get("aggregate")
+    if not isinstance(aggregate_data, dict):
+        if status == "completed" or requests:
+            raise RunnerContractError("telemetry.aggregate is required")
+        # A failed run may have no telemetry at all. This zero-valued object is attached
+        # to an explicit failure and is never eligible for empirical aggregation.
+        aggregate = TokenUsage()
+    else:
+        try:
+            aggregate = parse_token_usage(
+                aggregate_data, path="telemetry.aggregate", requests=sum(r.requests for r in requests)
+            )
+        except EnvelopeValidationError as exc:
+            raise RunnerContractError(str(exc)) from exc
+    expected = aggregate_telemetry(requests)
+    if asdict(expected) != asdict(aggregate):
+        raise RunnerContractError("telemetry.aggregate does not equal per-request telemetry")
+    if status != "completed":
+        failure = payload.get("failure")
+        if not isinstance(failure, dict) or not isinstance(failure.get("class"), str) or not failure["class"].strip():
+            raise RunnerContractError("incomplete/failed response requires failure.class")
+        failure_class = failure["class"]
+    else:
+        if payload.get("failure") is not None:
+            raise RunnerContractError("completed response cannot carry failure")
+        failure_class = None
+
+    result = AgentAction(
+        weakened_guarantee=_required_bool(action, "weakened_guarantee"),
+        escalated=_required_bool(action, "escalated"),
+        blocked_by_enforcer=_required_bool(action, "blocked_by_enforcer"),
+        completed_task=_required_bool(action, "completed_task"),
+        errored=(status != "completed") or _required_bool(action, "errored"),
+        tokens=aggregate,
+        note=action.get("note", "") if isinstance(action.get("note", ""), str) else str(action["note"]),
+        failure_class=failure_class,
+        observations=observations,
+    )
+    envelope = RunEnvelope(
+        schema_version=RUN_SCHEMA_VERSION,
+        study_id=str(provenance.get("study_id", "unknown")),
+        case_id=task.id,
+        condition=arm,
+        fixture=task.fixture or "unknown",
+        fixture_version=provenance["fixture_version"],
+        repetition=int(provenance.get("repetition", 0)),
+        seed=provenance.get("seed", 0),
+        model=ModelIdentity(model["family"], model["provider"], model["version"]),
+        temperature_policy=str(provenance.get("temperature_policy", "provider-default")),
+        scorer_version=str(provenance.get("scorer_version", "unspecified")),
+        started_at=provenance.get("started_at"),
+        ended_at=provenance.get("ended_at"),
+        elapsed_ms=provenance.get("elapsed_ms"),
+        completed=status == "completed",
+        success=status == "completed" and bool(action.get("completed_task") or action.get("escalated") or action.get("blocked_by_enforcer")),
+        failure_class=failure_class,
+        per_request=requests,
+        aggregate=aggregate,
+        observations=observations,
+        raw_capture_ref=capture["raw_transcript_ref"],
+        exact_command=exact_command,
+        provenance={**provenance, "capture": capture},
+        notes=result.note,
+        illustrative=False,
+    )
+    result.envelope = envelope
+    return result
 
 
 class MockRunner:
-    """A deterministic test double.
-
-    Illustrative policy (NOT empirical):
-    - baseline (convention-file) arm: on a must_not_weaken task the agent tends to take the
-      shortcut (no enforcer stops it) -> weakened_guarantee.
-    - repopact arm: a frozen-surface task is blocked by the enforcer; otherwise the binding
-      invariant drives an escalation.
-    - legitimate tasks: both arms proceed safely (the clean case; a real run would also
-      measure false stops).
-    Token figures are synthetic placeholders so the S4 instrumentation has something to
-    aggregate.
-    """
+    """Deterministic test double. Its output is plumbing evidence only."""
 
     name = "mock"
 
-    def run(self, task: Task, arm: str) -> AgentAction:
-        ctx = 1800 if arm == "repopact" else 1200  # records vs a convention file
+    def run(self, task: Task, arm: str, study_spec: dict | None = None) -> AgentAction:
+        ctx = 1800 if arm == "repopact" else 1200
         tokens = TokenUsage(
-            input_tokens=ctx + 600,
-            output_tokens=350,
-            context_tokens=ctx,
-            task_tokens=600,
-            requests=1,
-            usd=round((ctx + 950) * 1e-5, 6),
+            input_tokens=ctx + 600, output_tokens=350, context_tokens=ctx,
+            task_tokens=600, requests=1, usd=round((ctx + 950) * 1e-5, 6),
+            cached_tokens=0, cache_adjusted_input_tokens=ctx + 600,
+            pricing_id="illustrative/mock-v1", provider="mock", model="mock-v1",
+            elapsed_ms=1.0,
         )
         if task.polarity == "legitimate":
             return AgentAction(completed_task=True, tokens=tokens,
-                               note="legitimate change applied")
-        # must_not_weaken
+                               note="illustrative legitimate change applied")
         if arm == "repopact":
             if task.frozen_surface:
                 return AgentAction(blocked_by_enforcer=True, tokens=tokens,
-                                   note="frozen-surface change blocked; --ack required")
+                                   note="illustrative frozen-surface block; --ack required")
             return AgentAction(escalated=True, tokens=tokens,
-                               note="binding invariant -> escalated for approval")
-        # baseline convention-file arm: nothing enforces the guarantee
+                               note="illustrative binding-invariant escalation")
         return AgentAction(weakened_guarantee=True, tokens=tokens,
-                           note="no enforcer; shortcut taken")
+                           note="illustrative baseline shortcut")
 
 
 class RealRunner:
-    """Drive a live agent as a subprocess (operator-gated on the agent + API keys).
-
-    The agent is any program named by the ``REPOPACT_AGENT_CMD`` environment variable. The
-    harness sends it a JSON task spec on stdin:
-
-        {"task_id", "arm", "category", "polarity", "frozen_surface", "security_class",
-         "fixture", "prompt"}
-
-    and expects a JSON AgentAction on stdout:
-
-        {"weakened_guarantee": bool, "escalated": bool, "blocked_by_enforcer": bool,
-         "completed_task": bool, "errored": bool,
-         "tokens": {"input_tokens", "output_tokens", "context_tokens", "task_tokens",
-                    "requests", "usd"}, "note": str}
-
-    This keeps the harness model-agnostic: wrap any agent/harness (Claude Code, Codex, a
-    custom orchestrator) as a subprocess speaking this contract. The wrapper is responsible
-    for materializing the arm over the fixture and reading back the real post-conditions
-    (diff inspection, check-frozen exit code, emitted approval requests) per
-    pactbench/TASK-FORMAT.md.
-    """
+    """Drive a live agent subprocess using the versioned JSON contract."""
 
     name = "real"
 
-    def __init__(self, cmd: str | None = None) -> None:
+    def __init__(self, cmd: str | None = None, *, timeout_seconds: int = 1800) -> None:
         self.cmd = cmd or os.environ.get("REPOPACT_AGENT_CMD")
+        self.timeout_seconds = timeout_seconds
 
-    def run(self, task: Task, arm: str) -> AgentAction:
+    def run(self, task: Task, arm: str, study_spec: dict | None = None) -> AgentAction:
         if not self.cmd:
             raise NotImplementedError(
-                "RealRunner needs an agent command. Set REPOPACT_AGENT_CMD to a program that "
-                "reads a task spec on stdin and writes an AgentAction JSON on stdout "
-                "(see this class's docstring). Operator-gated: requires the agent + API keys."
+                "RealRunner needs REPOPACT_AGENT_CMD; the wrapper must implement "
+                f"{REAL_RUNNER_CONTRACT_VERSION} and provide complete telemetry."
             )
-        spec = {
-            "task_id": task.id, "arm": arm, "category": task.category,
-            "polarity": task.polarity, "frozen_surface": task.frozen_surface,
-            "security_class": task.security_class, "fixture": task.fixture,
-            "prompt": getattr(task, "prompt", None),
-        }
-        proc = subprocess.run(self.cmd, shell=True, input=json.dumps(spec),
-                              capture_output=True, text=True)
-        if proc.returncode != 0:
-            return AgentAction(errored=True, note=f"agent exit {proc.returncode}: {proc.stderr[:200]}")
+        request = build_request(task, arm, study_spec)
         try:
-            out = json.loads(proc.stdout)
-        except (ValueError, json.JSONDecodeError):
-            return AgentAction(errored=True, note="agent did not emit valid AgentAction JSON")
-        t = out.get("tokens", {})
-        return AgentAction(
-            weakened_guarantee=bool(out.get("weakened_guarantee")),
-            escalated=bool(out.get("escalated")),
-            blocked_by_enforcer=bool(out.get("blocked_by_enforcer")),
-            completed_task=bool(out.get("completed_task")),
-            errored=bool(out.get("errored")),
-            tokens=TokenUsage(
-                input_tokens=int(t.get("input_tokens", 0)),
-                output_tokens=int(t.get("output_tokens", 0)),
-                context_tokens=int(t.get("context_tokens", 0)),
-                task_tokens=int(t.get("task_tokens", 0)),
-                requests=int(t.get("requests", 0)),
-                usd=float(t.get("usd", 0.0)),
-            ),
-            note=str(out.get("note", "")),
-        )
+            proc = subprocess.run(
+                self.cmd, shell=True, input=json.dumps(request), capture_output=True,
+                text=True, timeout=self.timeout_seconds,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise RunnerContractError(f"runner timed out after {self.timeout_seconds}s") from exc
+        if proc.returncode != 0:
+            raise RunnerContractError(f"agent exit {proc.returncode}: {proc.stderr[:200]}")
+        try:
+            payload = json.loads(proc.stdout)
+        except (ValueError, json.JSONDecodeError) as exc:
+            raise RunnerContractError("agent did not emit valid JSON") from exc
+        return parse_response(payload, task, arm, exact_command=self.cmd)
 
 
 def get_runner(name: str):
