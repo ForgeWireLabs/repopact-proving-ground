@@ -11,7 +11,7 @@ from benchmarks.harness.execution import (
     validate_envelope,
 )
 from benchmarks.harness.model import Task, TokenUsage
-from benchmarks.harness.registry import RegistrationError
+from benchmarks.harness.registry import RegistrationError, deterministic_seed
 from benchmarks.harness.runners import (
     REAL_RUNNER_CONTRACT_VERSION,
     RunnerContractError,
@@ -114,6 +114,12 @@ class BenchmarkSuiteTests(unittest.TestCase):
         self.assertEqual(request["protocol_version"], REAL_RUNNER_CONTRACT_VERSION)
         self.assertEqual(request["study_spec"]["study_id"], "S2")
         self.assertEqual(request["task"]["prompt"], "continue")
+
+    def test_seed_derivation_is_stable_and_repetition_specific(self):
+        first = deterministic_seed("S4", "tasks.v1", "context-001", "C7", 0)
+        self.assertEqual(first, deterministic_seed("S4", "tasks.v1", "context-001", "C7", 0))
+        self.assertNotEqual(first, deterministic_seed("S4", "tasks.v1", "context-001", "C7", 1))
+        self.assertGreaterEqual(first, 0)
 
     def test_real_runner_parses_complete_versioned_response_into_envelope(self):
         task = Task("0001", "test", "correctness", "must_not_weaken", False, ["baseline"], prompt="continue")

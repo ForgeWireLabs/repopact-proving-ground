@@ -21,6 +21,14 @@ def file_digest(path: str | Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def deterministic_seed(study_id: str, task_set_version: str, case_id: str, condition: str, repetition: int) -> int:
+    """Implement the WI022 preregistered unsigned first-64-bit seed policy."""
+    if repetition < 0:
+        raise ValueError("repetition must be non-negative")
+    material = f"{study_id}|{task_set_version}|{case_id}|{condition}|{repetition}".encode()
+    return int.from_bytes(hashlib.sha256(material).digest()[:8], "big", signed=False)
+
+
 @dataclass(frozen=True)
 class RegisteredSet:
     study_id: str
