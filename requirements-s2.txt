@@ -1,0 +1,2 @@
+# Acquisition-only parser for the preregistered Parquet and Arrow task beds.
+pyarrow==25.0.1
