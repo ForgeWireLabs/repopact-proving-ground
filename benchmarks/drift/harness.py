@@ -16,27 +16,49 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-# Prefer a local scripts/ checkout (the repopact repo); otherwise rely on the installed
-# repopact package (e.g. the RepoPact Proving Ground, which consumes RepoPact from PyPI and
-# has no vendored scripts/).
-_scripts = ROOT / "scripts"
-if (_scripts / "validate_repo.py").exists():
-    sys.path.insert(0, str(_scripts))
 
-import init_repo                       # noqa: E402
-from generate_dashboard import write_dashboard  # noqa: E402
-from validate_repo import validate     # noqa: E402
+
+def _run_repopact(*args: str | Path) -> subprocess.CompletedProcess[str]:
+    """Run the installed RepoPact command boundary used by adopters.
+
+    S5 must exercise the published package rather than importing modules from a
+    RepoPact checkout.  ``repopact.cli`` is the supported module entry point and
+    keeps this harness usable on hosts where the console-script directory is not
+    on ``PATH``.
+    """
+    return subprocess.run(
+        [sys.executable, "-m", "repopact.cli", *(str(arg) for arg in args)],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+
+def _command_output(result: subprocess.CompletedProcess[str]) -> str:
+    return "\n".join(part for part in (result.stdout, result.stderr) if part).strip()
+
+
+def _first_diagnostic(result: subprocess.CompletedProcess[str]) -> str | None:
+    lines = [line.strip() for line in _command_output(result).splitlines() if line.strip()]
+    for line in lines:
+        if "ERROR" in line:
+            return line
+    return lines[-1] if lines else None
 
 
 def _base_repo(dst: Path) -> Path:
     """A valid governed repo to drift from."""
-    init_repo.bootstrap(dst)
-    assert not validate(dst), "base repo must be valid before mutation"
+    initialized = _run_repopact("init", "--target", dst)
+    assert initialized.returncode == 0, _command_output(initialized)
+    validated = _run_repopact("validate", "--root", dst)
+    assert validated.returncode == 0, _command_output(validated)
     return dst
 
 
@@ -107,18 +129,19 @@ def run() -> list[dict]:
             repo = _base_repo(Path(tmp) / "repo")
             fn(repo)
             # Ledger mutations must refresh their declared derived projection before
-            # measuring the intended drift rule. Otherwise RepoPact 2.2.0 correctly
-            # reports a stale dashboard and masks whether the mutation itself is a
-            # structural violation or an honest blind spot such as M7.
-            write_dashboard(repo)
-            problems = validate(repo)
-            detected = bool(problems)
+            # measuring the intended drift rule. Otherwise RepoPact correctly reports
+            # a stale dashboard and masks whether the mutation itself is a structural
+            # violation or an honest blind spot such as M7.
+            dashboard = _run_repopact("dashboard", "--root", repo)
+            assert dashboard.returncode == 0, _command_output(dashboard)
+            validated = _run_repopact("validate", "--root", repo)
+            detected = validated.returncode != 0
             results.append({
                 "id": mid, "label": label, "blind_spot": blind,
                 "repopact_detected": detected,
                 "repopact_latency": 1 if detected else "inf",
                 "baseline_detected": False, "baseline_latency": "inf",
-                "firing": problems[0].message if problems else None,
+                "firing": _first_diagnostic(validated) if detected else None,
             })
     return results
 
