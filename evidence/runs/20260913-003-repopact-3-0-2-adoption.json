@@ -1,0 +1,51 @@
+{
+  "$schema": "../../schemas/evidence-run.schema.json",
+  "id": "20260913-003-repopact-3-0-2-adoption",
+  "timestamp": "2026-09-13T17:08:00-05:00",
+  "work_item": "003",
+  "result": "passed",
+  "provenance": "concrete",
+  "commands": [
+    {
+      "command": "python -m pip install --no-cache-dir -r requirements-repopact.txt",
+      "exit_code": 0,
+      "summary": "Installed the exact declared package repopact==3.0.2."
+    },
+    {
+      "command": "python -m repopact.cli dashboard --root .; python -m repopact.cli validate --root .",
+      "exit_code": 0,
+      "summary": "Generated the canonical dashboard and passed governance validation from the packaged CLI boundary."
+    },
+    {
+      "command": "python -m unittest discover -s tests -v",
+      "exit_code": 0,
+      "summary": "All 22 Proving Ground unit tests passed."
+    },
+    {
+      "command": "python benchmarks/harness/run.py --selftest",
+      "exit_code": 0,
+      "summary": "All 24 deterministic PactBench tasks passed; MockRunner output remains illustrative and non-empirical."
+    },
+    {
+      "command": "python benchmarks/drift/harness.py --selftest",
+      "exit_code": 0,
+      "summary": "S5 drift selftest passed after replacing removed flat imports with subprocess calls through python -m repopact.cli."
+    }
+  ],
+  "artifacts": [
+    "requirements-repopact.txt",
+    "README.md",
+    "benchmarks/drift/harness.py",
+    "work/completed/003-repopact-3-0-2-adoption/",
+    "audits/reports/dashboard.md"
+  ],
+  "environment": {
+    "repository": "ForgeWireLabs/repopact-proving-ground",
+    "commit": "c575dad4b726ce597f869dcdf9e5d6b493041259",
+    "platform": "Windows",
+    "python": "3.13",
+    "repopact_version": "3.0.2",
+    "hosted_ci": "not run",
+    "cross_platform_execution": "not claimed"
+  }
+}
