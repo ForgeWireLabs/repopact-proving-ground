@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/work-item.schema.json",
   "id": "004",
   "title": "Make S2 task beds reproducibly materializable",
-  "status": "active",
+  "status": "completed",
   "owner_scope": "governance",
   "affected_scopes": ["governance"],
   "depends_on": ["003"],
@@ -16,26 +16,26 @@
     {
       "id": "S2-001",
       "text": "Both preregistered S2 beds acquire their immutable upstream assets and reject moving revisions or digest mismatches.",
-      "state": "pending",
-      "evidence": []
+      "state": "satisfied",
+      "evidence": ["20260913-004-s2-deterministic-materialization"]
     },
     {
       "id": "S2-002",
       "text": "Every registered selector is validated exactly once against its actual source schema and has a safe model-facing projection separated from evaluation metadata.",
-      "state": "pending",
-      "evidence": []
+      "state": "satisfied",
+      "evidence": ["20260913-004-s2-deterministic-materialization"]
     },
     {
       "id": "S2-003",
       "text": "Each bed produces a deterministic identity manifest and offline verification detects tampering independently of its materialization directory or timestamp.",
-      "state": "pending",
-      "evidence": []
+      "state": "satisfied",
+      "evidence": ["20260913-004-s2-deterministic-materialization"]
     },
     {
       "id": "S2-004",
       "text": "All selected source repositories and base commits pass bounded resolution preflight, and no model or third-party payload is committed.",
-      "state": "pending",
-      "evidence": []
+      "state": "satisfied",
+      "evidence": ["20260913-004-s2-deterministic-materialization"]
     }
   ],
   "created": "2026-09-13",

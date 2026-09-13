@@ -1,6 +1,6 @@
 # 004 — Make S2 task beds reproducibly materializable
 
-> **Status**: Active
+> **Status**: Complete
 > **Owner**: governance-owner
 
 ## Intent
@@ -13,11 +13,18 @@ projections, record reproducible manifests, and support offline verification.
 
 ## Acceptance criteria
 
-- [ ] **S2-001** Both registered beds acquire immutable assets and reject moving
+- [x] **S2-001** Both registered beds acquire immutable assets and reject moving
   revisions or digest mismatches.
-- [ ] **S2-002** Registered selectors are found exactly once, validated against
+- [x] **S2-002** Registered selectors are found exactly once, validated against
   their real schemas, and projected without gold-solution leakage.
-- [ ] **S2-003** Manifests have stable identity fingerprints and offline
+- [x] **S2-003** Manifests have stable identity fingerprints and offline
   verification detects tampering.
-- [ ] **S2-004** All six source/base commits resolve in bounded preflight; no
+- [x] **S2-004** All six source/base commits resolve in bounded preflight; no
   model or third-party payload is committed.
+
+## Evidence
+
+`20260913-004-s2-deterministic-materialization` records the exact pinned
+source assets, selected IDs, per-record digests, base-commit preflight, stable
+fingerprints, offline verification, and the absence of tracked materialization
+payloads. No model or empirical benchmark run was performed.

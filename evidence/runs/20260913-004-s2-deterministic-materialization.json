@@ -1,0 +1,123 @@
+{
+  "$schema": "../../schemas/evidence-run.schema.json",
+  "id": "20260913-004-s2-deterministic-materialization",
+  "timestamp": "2026-09-13T18:13:08-05:00",
+  "work_item": "004",
+  "result": "passed",
+  "provenance": "concrete",
+  "commands": [
+    {
+      "command": "python -m pip install -r requirements-s2.txt",
+      "exit_code": 0,
+      "summary": "Installed the acquisition-only parser pyarrow==25.0.1."
+    },
+    {
+      "command": "python benchmarks/s2/materialize.py --bed swe-bench-verified --out .s2-materialized",
+      "started_at": "2026-09-13T18:10:32-05:00",
+      "ended_at": "2026-09-13T18:11:05-05:00",
+      "exit_code": 0,
+      "summary": "Materialized the four registered SWE-bench Verified records from the pinned Parquet asset; SHA-256 a45b1fe4e2f0c8390b2b2938ac83e92ed5979000856808f3679c07812e9e6dcd, 2096679 bytes, fingerprint 6fb042bfeb85d8886b55b6ee7faa6872426a1c9a6cc20efddae33fcdb7473144."
+    },
+    {
+      "command": "python benchmarks/s2/materialize.py --bed swe-bench-verified --out .s2-materialized --verify",
+      "started_at": "2026-09-13T18:11:05-05:00",
+      "ended_at": "2026-09-13T18:11:06-05:00",
+      "exit_code": 0,
+      "summary": "Offline verification passed without network access."
+    },
+    {
+      "command": "python benchmarks/s2/materialize.py --bed swe-evo --out .s2-materialized",
+      "started_at": "2026-09-13T18:13:04-05:00",
+      "ended_at": "2026-09-13T18:13:06-05:00",
+      "exit_code": 0,
+      "summary": "Re-verified the exact SWE-EVO checkout and Arrow asset; Git revision 9b83d5af943ba7a17567336f5b18239f73960219, blob ab6c97407ef800bb2bac8660ba9ef45f77a85e53, SHA-256 74e7c63160ada4ceba71d5d89a9bb7c9794f4574b384458d546eb65cdb730520, 12815976 bytes, fingerprint a0b7d326dde79fe4e076783ce1bd74f57141475737163ff51248ea1adc293353."
+    },
+    {
+      "command": "python benchmarks/s2/materialize.py --bed swe-evo --out .s2-materialized --verify",
+      "started_at": "2026-09-13T18:13:06-05:00",
+      "ended_at": "2026-09-13T18:13:07-05:00",
+      "exit_code": 0,
+      "summary": "Offline verification passed without network access."
+    },
+    {
+      "command": "python -m unittest discover -s tests -v",
+      "started_at": "2026-09-13T18:13:07-05:00",
+      "ended_at": "2026-09-13T18:13:08-05:00",
+      "exit_code": 0,
+      "summary": "All 40 proving-ground tests passed, including 18 S2 materializer tests."
+    },
+    {
+      "command": "git ls-files .s2-materialized",
+      "exit_code": 0,
+      "summary": "Produced no output: source payloads, repository checkout, projections, and manifests remain untracked ignored materialization output."
+    }
+  ],
+  "artifacts": [
+    "benchmarks/s2/task-set.json",
+    "benchmarks/s2/materialize.py",
+    "benchmarks/s2/materialization.schema.json",
+    "requirements-s2.txt",
+    "tests/test_s2_materialize.py",
+    ".s2-materialized/swe-bench-verified/REPOPACT-S2-MATERIALIZATION.json",
+    ".s2-materialized/swe-evo/REPOPACT-S2-MATERIALIZATION.json",
+    "work/completed/004-s2-deterministic-materialization/"
+  ],
+  "materializations": {
+    "swe-bench-verified": {
+      "locator": "https://huggingface.co/datasets/princeton-nlp/SWE-bench_Verified",
+      "revision": "c104f840cc67f8b6eec6f759ebc8b2693d585d4a",
+      "asset": "data/test-00000-of-00001.parquet",
+      "sha256": "a45b1fe4e2f0c8390b2b2938ac83e92ed5979000856808f3679c07812e9e6dcd",
+      "selected_task_ids": [
+        "django__django-11099",
+        "matplotlib__matplotlib-23314",
+        "scikit-learn__scikit-learn-10297",
+        "sympy__sympy-20590"
+      ],
+      "base_commits": {
+        "django__django-11099": "d26b2424437dabeeca94d7900b37d2df4410da0c",
+        "matplotlib__matplotlib-23314": "97fc1154992f64cfb2f86321155a7404efeb2d8a",
+        "scikit-learn__scikit-learn-10297": "b90661d6a46aa3619d3eec94d5281f5888add501",
+        "sympy__sympy-20590": "cffd4e0f86fefd4802349a9f9b19ed70934ea354"
+      },
+      "record_sha256": {
+        "django__django-11099": "bc2ea298e18afc3cae9e1c706b742092fe150bd74d0c3748a27b7c9791455b84",
+        "matplotlib__matplotlib-23314": "16ee0e952479a9f7ab7b1b80072bbdfe1712f4b6e1ee41d4f196274eade1a8ea",
+        "scikit-learn__scikit-learn-10297": "b4b34831fb4a82a699a68ee8a22dac473f0d593a9e1e921357005fee53b0cdca",
+        "sympy__sympy-20590": "62c677d952d3e0532a82f284fec48b545612f347afadaab7b0d1a5127e0a1f2f"
+      },
+      "fingerprint": "6fb042bfeb85d8886b55b6ee7faa6872426a1c9a6cc20efddae33fcdb7473144"
+    },
+    "swe-evo": {
+      "locator": "https://github.com/SWE-EVO/SWE-EVO",
+      "revision": "9b83d5af943ba7a17567336f5b18239f73960219",
+      "asset": "hf_out/hf_dataset/test/data-00000-of-00001.arrow",
+      "git_blob_sha": "ab6c97407ef800bb2bac8660ba9ef45f77a85e53",
+      "sha256": "74e7c63160ada4ceba71d5d89a9bb7c9794f4574b384458d546eb65cdb730520",
+      "selected_task_ids": [
+        "dask__dask_2023.6.1_2023.7.0",
+        "iterative__dvc_0.33.1_0.34.0"
+      ],
+      "base_commits": {
+        "dask__dask_2023.6.1_2023.7.0": "85c99bc20abc382774cfb6e5bf5f2db76ac09378",
+        "iterative__dvc_0.33.1_0.34.0": "c645fdd45e0352f6cdfedee1392dc88e48f7d169"
+      },
+      "record_sha256": {
+        "dask__dask_2023.6.1_2023.7.0": "3ab32850ed5597b77545e3c76083cfd6d2ccb590acb206b56c1aa78805713437",
+        "iterative__dvc_0.33.1_0.34.0": "76db0c5aad732710481b2a16d868080a167650718297bfa9616cdfa1f2a2c609"
+      },
+      "fingerprint": "a0b7d326dde79fe4e076783ce1bd74f57141475737163ff51248ea1adc293353"
+    }
+  },
+  "environment": {
+    "repository": "ForgeWireLabs/repopact-proving-ground",
+    "implementation_commit": "913df7b8ff13139c7523a26887ab4a840013318d",
+    "python": "3.13",
+    "pyarrow": "25.0.1",
+    "repopact_version": "3.0.2",
+    "model_execution": "not run",
+    "hosted_ci": "not run",
+    "cross_platform_execution": "not claimed",
+    "third_party_payload_committed": false
+  }
+}
