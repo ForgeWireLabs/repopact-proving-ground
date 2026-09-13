@@ -9,7 +9,11 @@ so results cannot be manufactured by post-hoc curation.
 |---|---|---|---|---|
 | `pactbench/` | S1, S6a | guarantee-violation catch/escalate rate (correctness + security) | H8, H13a | `020` |
 | `drift/` | S5 | drift detection / staleness vs convention files | H12 | `022` |
-| _(S2/S3/S4/S6b harnesses)_ | S2–S6 | recovery, coordination, token economy, injection | H9–H13 | `022` |
+| `s2/` | S2 | cross-session recovery + efficiency | H9 | `022` |
+| `s3/` | S3 | multi-agent coordination | H10 | `022` |
+| `s4/` | S4 | context-token economy + analyses | H11 | `022` |
+| `s5/` | S5 | shared-envelope drift adapter | H12 | `022` |
+| `s6b/` | S6b | context-file injection resistance | H13 | `022` |
 
 PactBench (S1) and the security-invariant slice (S6a) **share one task format** — they
 differ only in the `category` field — so they live together under `pactbench/`. See
@@ -27,9 +31,10 @@ differ only in the `category` field — so they live together under `pactbench/`
 - **Drift (S5):** 15 pre-registered mutations (M1–M15; M4/M5/M7/M9 are honest RepoPact blind
   spots) **plus a runnable harness** (`drift/harness.py`) that applies the validator-checkable
   mutations and records detection + latency (baseline convention-files detect none).
-- **Harness:** `harness/` runs the pipeline end-to-end via a deterministic `MockRunner`;
-  `RealRunner` is a subprocess agent adapter (set `REPOPACT_AGENT_CMD`) — operator-gated on
-  the agent + API keys.
+- **Harness:** `harness/` runs the PactBench pipeline end-to-end via a deterministic
+  `MockRunner`; its versioned `RealRunner` is a subprocess agent adapter (set
+  `REPOPACT_AGENT_CMD`) — operator-gated on the agent + API keys. All mock/selftest output
+  is explicitly illustrative/non-empirical.
 
 These are seeds, sized to be balanced and honest, not final N. The harness scales them up;
 new tasks/mutations get new ids (never silent edits to a registered one).

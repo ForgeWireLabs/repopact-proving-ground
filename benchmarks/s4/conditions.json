@@ -1,0 +1,19 @@
+{
+  "schema_version": "repopact.s4-conditions.v1",
+  "study_id": "S4",
+  "version": "2026-09-13.s4.1",
+  "registered": "2026-09-13",
+  "conditions": [
+    {"id": "C0", "name": "zero-context", "runnable": true},
+    {"id": "C1", "name": "full-prompt-stuffing", "runnable": true},
+    {"id": "C2", "name": "convention-file-only", "runnable": true},
+    {"id": "C2+C3", "name": "convention-file-plus-rag", "runnable": true},
+    {"id": "C3", "name": "rag-vector-retrieval", "runnable": true},
+    {"id": "C4", "name": "summarized-rolling-memory", "runnable": true},
+    {"id": "C5", "name": "external-agent-memory-store", "runnable": true},
+    {"id": "C6", "name": "on-demand-tool-fetch", "runnable": true},
+    {"id": "C7", "name": "repopact-records", "runnable": true},
+    {"id": "C8", "name": "repopact-plus-rag", "runnable": true},
+    {"id": "C9", "name": "in-weights-fine-tuned", "runnable": false}
+  ]
+}

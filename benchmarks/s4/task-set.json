@@ -1,0 +1,11 @@
+{
+  "schema_version": "repopact.s4-task-set.v1",
+  "study_id": "S4",
+  "version": "2026-09-13.s4.tasks.1",
+  "registered": "2026-09-13",
+  "tasks": [
+    {"id": "context-001", "fixture": "pactbench/fixtures/calc-rounding", "prompt_class": "small-code-change"},
+    {"id": "context-002", "fixture": "pactbench/fixtures/api-orders", "prompt_class": "security-preserving-change"},
+    {"id": "context-003", "fixture": "pactbench/fixtures/checkout", "prompt_class": "multi-file-change"}
+  ]
+}

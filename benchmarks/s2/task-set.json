@@ -1,0 +1,30 @@
+{
+  "schema_version": "repopact.s2-task-set.v1",
+  "study_id": "S2",
+  "version": "2026-09-13.s2.1",
+  "registered": "2026-09-13",
+  "task_sets": [
+    {
+      "id": "swe-bench-verified",
+      "dataset": "https://huggingface.co/datasets/princeton-nlp/SWE-bench_Verified",
+      "revision": "c104f840cc67f8b6eec6f759ebc8b2693d585d4a",
+      "task_ids": [
+        "django__django-11099",
+        "matplotlib__matplotlib-23314",
+        "scikit-learn__scikit-learn-10297",
+        "sympy__sympy-20590"
+      ],
+      "materialization": "benchmarks/s2/materialize.py --bed swe-bench-verified"
+    },
+    {
+      "id": "swe-evo",
+      "dataset": "https://github.com/SWE-EVO/SWE-EVO",
+      "revision": "9b83d5af943ba7a17567336f5b18239f73960219",
+      "task_ids": [
+        "dask__dask_2023.6.1_2023.7.0",
+        "iterative__dvc_0.33.1_0.34.0"
+      ],
+      "materialization": "benchmarks/s2/materialize.py --bed swe-evo"
+    }
+  ]
+}

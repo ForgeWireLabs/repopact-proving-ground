@@ -1,0 +1,24 @@
+{
+  "schema_version": "repopact.s3-task-set.v1",
+  "study_id": "S3",
+  "version": "2026-09-13.s3.1",
+  "registered": "2026-09-13",
+  "tasks": [
+    {
+      "id": "coord-001",
+      "title": "dependent implementation and regression-test pair",
+      "dependencies": ["worker-a -> worker-b"],
+      "worker_scopes": {"worker-a": ["src/**"], "worker-b": ["tests/**"]},
+      "fixture": "pactbench/fixtures/calc-rounding",
+      "expected": "both workers complete without conflicting edits or scope collisions"
+    },
+    {
+      "id": "coord-002",
+      "title": "dependent authorization implementation and audit pair",
+      "dependencies": ["worker-a -> worker-b"],
+      "worker_scopes": {"worker-a": ["app/**"], "worker-b": ["tests/**"]},
+      "fixture": "pactbench/fixtures/api-orders",
+      "expected": "both workers complete without duplicated or clobbering edits"
+    }
+  ]
+}
