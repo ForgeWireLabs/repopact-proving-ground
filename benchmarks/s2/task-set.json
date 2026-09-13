@@ -1,13 +1,29 @@
 {
   "schema_version": "repopact.s2-task-set.v1",
   "study_id": "S2",
-  "version": "2026-09-13.s2.1",
+  "version": "2026-09-13.s2.2",
   "registered": "2026-09-13",
   "task_sets": [
     {
       "id": "swe-bench-verified",
       "dataset": "https://huggingface.co/datasets/princeton-nlp/SWE-bench_Verified",
       "revision": "c104f840cc67f8b6eec6f759ebc8b2693d585d4a",
+      "source_type": "huggingface",
+      "source_format": "parquet",
+      "adapter": "swe-bench-verified-v1",
+      "asset_path": "data/test-00000-of-00001.parquet",
+      "asset_sha256": "a45b1fe4e2f0c8390b2b2938ac83e92ed5979000856808f3679c07812e9e6dcd",
+      "required_source_fields": [
+        "repo",
+        "instance_id",
+        "base_commit",
+        "patch",
+        "test_patch",
+        "problem_statement",
+        "FAIL_TO_PASS",
+        "PASS_TO_PASS",
+        "environment_setup_commit"
+      ],
       "task_ids": [
         "django__django-11099",
         "matplotlib__matplotlib-23314",
@@ -20,6 +36,26 @@
       "id": "swe-evo",
       "dataset": "https://github.com/SWE-EVO/SWE-EVO",
       "revision": "9b83d5af943ba7a17567336f5b18239f73960219",
+      "source_type": "git",
+      "source_format": "arrow-stream",
+      "adapter": "swe-evo-v1",
+      "asset_path": "hf_out/hf_dataset/test/data-00000-of-00001.arrow",
+      "asset_sha256": "74e7c63160ada4ceba71d5d89a9bb7c9794f4574b384458d546eb65cdb730520",
+      "asset_git_blob_sha": "ab6c97407ef800bb2bac8660ba9ef45f77a85e53",
+      "required_source_fields": [
+        "repo",
+        "instance_id",
+        "base_commit",
+        "patch",
+        "test_patch",
+        "problem_statement",
+        "FAIL_TO_PASS",
+        "PASS_TO_PASS",
+        "environment_setup_commit",
+        "start_version",
+        "end_version",
+        "end_version_commit"
+      ],
       "task_ids": [
         "dask__dask_2023.6.1_2023.7.0",
         "iterative__dvc_0.33.1_0.34.0"
