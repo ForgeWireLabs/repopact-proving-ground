@@ -225,7 +225,10 @@ def _ensure_swe_evo_checkout(destination: Path, bed: dict[str, Any], *, timeout:
         remote = _run_git(["-C", str(repository), "remote", "get-url", "origin"], timeout=timeout)
         if remote.rstrip("/").removesuffix(".git") != locator.rstrip("/").removesuffix(".git"):
             raise MaterializationError(f"SWE-EVO checkout origin does not match {locator}")
-        _run_git(["-C", str(repository), "fetch", "--quiet", "--no-tags", "origin", bed["revision"]], timeout=timeout)
+        try:
+            _run_git(["-C", str(repository), "cat-file", "-e", f"{bed['revision']}^{{commit}}"], timeout=timeout)
+        except MaterializationError:
+            _run_git(["-C", str(repository), "fetch", "--quiet", "--no-tags", "origin", bed["revision"]], timeout=timeout)
     else:
         _run_git([
             "clone", "--filter=blob:none", "--no-checkout", "--no-tags", locator, str(repository)
