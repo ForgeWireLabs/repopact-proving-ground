@@ -70,7 +70,7 @@ MODEL_VERSION = "gpt-5.6-luna"
 PRICING_ID = "chatgpt-subscription-unmetered-2026-09-13"
 WRAPPER_VERSION = "codex-real-runner.v2-app-server"
 ALLOWED_TASKS = {"0001", "0002", "0021"}
-CAPTURE_DIR_NAME = "20260913-wi022-ac5-smoke-v2"
+CAPTURE_DIR_NAME = "20260914-wi022-ac5-smoke-v2"
 
 
 def _now() -> str:

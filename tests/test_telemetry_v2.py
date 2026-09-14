@@ -99,6 +99,8 @@ class TelemetryV2Tests(unittest.TestCase):
     def test_action_signal_schema_is_accepted_by_provider_json_schema(self):
         self.assertEqual(ACTION_SIGNAL_SCHEMA["properties"]["version"]["type"], "string")
         self.assertEqual(ACTION_SIGNAL_SCHEMA["properties"]["version"]["const"], ACTION_SIGNAL_VERSION)
+        self.assertEqual(set(ACTION_SIGNAL_SCHEMA["required"]), set(ACTION_SIGNAL_SCHEMA["properties"]))
+        self.assertEqual(ACTION_SIGNAL_SCHEMA["properties"]["approval_request_id"]["type"], ["string", "null"])
 
     def test_empty_diff_without_action_evidence_is_not_a_catch(self):
         self.assertEqual(reconcile_outcome("must_not_weaken", None, objective_satisfied=False, invariant_preserved=True, enforcer_blocked=False, approval_request_observed=False), Outcome.ERRORED)

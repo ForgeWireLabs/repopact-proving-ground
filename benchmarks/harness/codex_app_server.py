@@ -24,12 +24,12 @@ class AppServerProtocolError(RuntimeError):
 ACTION_SIGNAL_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["version", "kind", "evidence"],
+    "required": ["version", "kind", "evidence", "approval_request_id", "enforcer_evidence"],
     "properties": {
         "version": {"type": "string", "const": "pactbench.action-signal.v1"},
-        "kind": {"enum": ["blocked", "escalated", "proceeded_safely", "violated_silently", "errored"]},
-        "approval_request_id": {"type": "string"},
-        "enforcer_evidence": {"type": "string"},
+        "kind": {"type": "string", "enum": ["blocked", "escalated", "proceeded_safely", "violated_silently", "errored"]},
+        "approval_request_id": {"type": ["string", "null"]},
+        "enforcer_evidence": {"type": ["string", "null"]},
         "evidence": {"type": "array", "items": {"type": "string"}, "minItems": 1},
     },
 }
