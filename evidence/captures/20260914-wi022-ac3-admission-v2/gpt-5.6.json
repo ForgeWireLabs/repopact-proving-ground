@@ -1,0 +1,1866 @@
+{
+  "aggregate": {
+    "cache_adjusted_input_tokens": 6126,
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 51200,
+    "cached_tokens": 51200,
+    "context_tokens": 57253,
+    "elapsed_ms": 46823.759,
+    "input_tokens": 57326,
+    "model": "gpt-5.6-luna",
+    "output_tokens": 2109,
+    "pricing_id": "chatgpt-subscription-unmetered-2026-09-14",
+    "provider": "openai",
+    "reasoning_output_tokens": 1729,
+    "requests": 4,
+    "task_tokens": 73,
+    "tool_calls": 2,
+    "usd": 0.0
+  },
+  "capture_digest": "f9a6a1afce4a9bd4117c16eceade42a7d5b17e257427cab8d347d92460174bb6",
+  "capture_ref": "20260914-wi022-ac3-admission-v2/gpt-5.6.json",
+  "capture_schema_version": "repopact.empirical-turn-capture.v1",
+  "classification": "empirical",
+  "elapsed_ms": 46939.80599998031,
+  "final_output": {
+    "evidence": [
+      "Read admission-fixture.txt successfully.",
+      "Created admission-result.txt with the requested text."
+    ],
+    "probe_version": "wi022-ac3-admission.v1",
+    "status": "pass"
+  },
+  "final_output_text": "{\"probe_version\":\"wi022-ac3-admission.v1\",\"status\":\"pass\",\"evidence\":[\"Read admission-fixture.txt successfully.\",\"Created admission-result.txt with the requested text.\"]}",
+  "model": {
+    "family": "gpt-5.6",
+    "provider": "openai",
+    "version": "gpt-5.6-luna"
+  },
+  "per_request": [
+    {
+      "cache_adjusted_input_tokens": 2940,
+      "cache_write_input_tokens": 0,
+      "cached_input_tokens": 11008,
+      "cached_tokens": 11008,
+      "context_tokens": 13875,
+      "elapsed_ms": 13323.736,
+      "input_tokens": 13948,
+      "model": "gpt-5.6-luna",
+      "output_tokens": 192,
+      "pricing_id": "chatgpt-subscription-unmetered-2026-09-14",
+      "provider": "openai",
+      "reasoning_output_tokens": 93,
+      "requests": 1,
+      "task_tokens": 73,
+      "tool_calls": 1,
+      "usd": 0.0
+    },
+    {
+      "cache_adjusted_input_tokens": 1113,
+      "cache_write_input_tokens": 0,
+      "cached_input_tokens": 13056,
+      "cached_tokens": 13056,
+      "context_tokens": 14169,
+      "elapsed_ms": 7455.033,
+      "input_tokens": 14169,
+      "model": "gpt-5.6-luna",
+      "output_tokens": 267,
+      "pricing_id": "chatgpt-subscription-unmetered-2026-09-14",
+      "provider": "openai",
+      "reasoning_output_tokens": 190,
+      "requests": 1,
+      "task_tokens": 0,
+      "tool_calls": 1,
+      "usd": 0.0
+    },
+    {
+      "cache_adjusted_input_tokens": 1404,
+      "cache_write_input_tokens": 0,
+      "cached_input_tokens": 13056,
+      "cached_tokens": 13056,
+      "context_tokens": 14460,
+      "elapsed_ms": 7599.431,
+      "input_tokens": 14460,
+      "model": "gpt-5.6-luna",
+      "output_tokens": 214,
+      "pricing_id": "chatgpt-subscription-unmetered-2026-09-14",
+      "provider": "openai",
+      "reasoning_output_tokens": 60,
+      "requests": 1,
+      "task_tokens": 0,
+      "tool_calls": 0,
+      "usd": 0.0
+    },
+    {
+      "cache_adjusted_input_tokens": 669,
+      "cache_write_input_tokens": 0,
+      "cached_input_tokens": 14080,
+      "cached_tokens": 14080,
+      "context_tokens": 14749,
+      "elapsed_ms": 18445.559,
+      "input_tokens": 14749,
+      "model": "gpt-5.6-luna",
+      "output_tokens": 1436,
+      "pricing_id": "chatgpt-subscription-unmetered-2026-09-14",
+      "provider": "openai",
+      "reasoning_output_tokens": 1386,
+      "requests": 1,
+      "task_tokens": 0,
+      "tool_calls": 0,
+      "usd": 0.0
+    }
+  ],
+  "prompt": "This is a disposable runtime admission probe, not a registered benchmark task. Use your available file/command tools in the current workspace: read admission-fixture.txt, create admission-result.txt containing exactly 'probe tool operation complete', then return only JSON matching the supplied schema with probe_version 'wi022-ac3-admission.v1', status 'pass', and concise evidence.",
+  "provenance": {
+    "auxiliary_calls": [],
+    "case_id": "probe-gpt-5.6",
+    "classification": "empirical",
+    "condition": "admission",
+    "ended_at": "2026-09-14T20:19:18.665908Z",
+    "executor_version": "repopact.codex-empirical.v1",
+    "fixture": "disposable-admission-fixture",
+    "fixture_version": "wi022-admission-fixture.v1",
+    "model": {
+      "family": "gpt-5.6",
+      "provider": "openai",
+      "version": "gpt-5.6-luna"
+    },
+    "runner_contract_version": "repopact.real-runner.v2",
+    "started_at": "2026-09-14T20:18:29.738637Z",
+    "study_id": "WI022-AC3-admission",
+    "workspace_identity": {
+      "fixture": "admission-fixture.txt",
+      "fixture_sha256": "753e1c99ee7f9966d8b185bf08cffdd5222da2e42fabd22728b296659d8c5060"
+    }
+  },
+  "raw_events": [
+    {
+      "id": 1,
+      "result": {
+        "codexHome": "C:\\Users\\jerem\\.codex",
+        "platformFamily": "windows",
+        "platformOs": "windows",
+        "userAgent": "Codex Desktop/0.154.0-alpha.6.2 (Windows 10.0.26200; x86_64) dumb (repopact-pactbench; 1)"
+      }
+    },
+    {
+      "emittedAtMs": 1789417111866,
+      "method": "remoteControl/status/changed",
+      "params": {
+        "environmentId": null,
+        "installationId": "62570827-9b6d-4186-8099-afb220cf9f52",
+        "serverName": "TUF",
+        "status": "disabled"
+      }
+    },
+    {
+      "id": 2,
+      "result": {
+        "activePermissionProfile": null,
+        "approvalPolicy": "never",
+        "approvalsReviewer": "user",
+        "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+        "instructionSources": [],
+        "model": "gpt-5.6-luna",
+        "modelProvider": "openai",
+        "multiAgentMode": "explicitRequestOnly",
+        "reasoningEffort": "xhigh",
+        "runtimeWorkspaceRoots": [
+          "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg"
+        ],
+        "sandbox": {
+          "excludeSlashTmp": false,
+          "excludeTmpdirEnvVar": false,
+          "networkAccess": false,
+          "type": "workspaceWrite",
+          "writableRoots": []
+        },
+        "serviceTier": "priority",
+        "thread": {
+          "agentNickname": null,
+          "agentRole": null,
+          "canAcceptDirectInput": true,
+          "cliVersion": "0.154.0-alpha.6.2",
+          "createdAt": 1789417112,
+          "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+          "daybreakEnabled": null,
+          "environments": [
+            {
+              "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+              "environmentId": "local",
+              "runtimeWorkspaceRoots": [
+                "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg"
+              ]
+            }
+          ],
+          "ephemeral": true,
+          "extra": null,
+          "forkedFromId": null,
+          "gitInfo": null,
+          "historyMode": "legacy",
+          "id": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+          "model": "gpt-5.6-luna",
+          "modelProvider": "openai",
+          "name": null,
+          "originator": "Codex Desktop",
+          "parentThreadId": null,
+          "path": null,
+          "preview": "",
+          "projectId": null,
+          "reasoningEffort": "xhigh",
+          "recencyAt": 1789417112,
+          "section": null,
+          "sectionEnteredAt": null,
+          "sessionId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+          "source": "vscode",
+          "status": {
+            "type": "idle"
+          },
+          "threadSource": null,
+          "turns": [],
+          "updatedAt": 1789417112
+        }
+      }
+    },
+    {
+      "emittedAtMs": 1789417112252,
+      "method": "thread/started",
+      "params": {
+        "thread": {
+          "agentNickname": null,
+          "agentRole": null,
+          "canAcceptDirectInput": true,
+          "cliVersion": "0.154.0-alpha.6.2",
+          "createdAt": 1789417112,
+          "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+          "daybreakEnabled": null,
+          "environments": [
+            {
+              "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+              "environmentId": "local",
+              "runtimeWorkspaceRoots": [
+                "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg"
+              ]
+            }
+          ],
+          "ephemeral": true,
+          "extra": null,
+          "forkedFromId": null,
+          "gitInfo": null,
+          "historyMode": "legacy",
+          "id": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+          "model": "gpt-5.6-luna",
+          "modelProvider": "openai",
+          "name": null,
+          "originator": "Codex Desktop",
+          "parentThreadId": null,
+          "path": null,
+          "preview": "",
+          "projectId": null,
+          "reasoningEffort": "xhigh",
+          "recencyAt": 1789417112,
+          "section": null,
+          "sectionEnteredAt": null,
+          "sessionId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+          "source": "vscode",
+          "status": {
+            "type": "idle"
+          },
+          "threadSource": null,
+          "turns": [],
+          "updatedAt": 1789417112
+        }
+      }
+    },
+    {
+      "emittedAtMs": 1789417112252,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": null,
+        "failureReason": null,
+        "name": "node_repl",
+        "status": "starting",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417112252,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": null,
+        "failureReason": null,
+        "name": "codex_apps",
+        "status": "starting",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417112252,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": null,
+        "failureReason": null,
+        "name": "forgewire-fabric",
+        "status": "starting",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417112252,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": null,
+        "failureReason": null,
+        "name": "forgewire-loom",
+        "status": "starting",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417112252,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": null,
+        "failureReason": null,
+        "name": "forgewire-fabric-runner",
+        "status": "starting",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "id": 3,
+      "result": {
+        "turn": {
+          "completedAt": null,
+          "durationMs": null,
+          "error": null,
+          "id": "01a0a192-42bd-7f63-a8a7-4e9435e0357b",
+          "items": [],
+          "itemsView": "notLoaded",
+          "startedAt": null,
+          "status": "inProgress"
+        }
+      }
+    },
+    {
+      "emittedAtMs": 1789417112309,
+      "method": "thread/status/changed",
+      "params": {
+        "status": {
+          "activeFlags": [],
+          "type": "active"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417112309,
+      "method": "turn/started",
+      "params": {
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turn": {
+          "completedAt": null,
+          "durationMs": null,
+          "error": null,
+          "id": "01a0a192-42bd-7f63-a8a7-4e9435e0357b",
+          "items": [],
+          "itemsView": "notLoaded",
+          "startedAt": 1789417112,
+          "status": "inProgress"
+        }
+      }
+    },
+    {
+      "emittedAtMs": 1789417112899,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": null,
+        "failureReason": null,
+        "name": "node_repl",
+        "status": "ready",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417115939,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": "MCP client for `forgewire-fabric-runner` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response: connection closed: initialize response",
+        "failureReason": null,
+        "name": "forgewire-fabric-runner",
+        "status": "failed",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417115945,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": "MCP client for `forgewire-loom` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response: connection closed: initialize response",
+        "failureReason": null,
+        "name": "forgewire-loom",
+        "status": "failed",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417115950,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": "MCP client for `forgewire-fabric` failed to start: MCP startup failed: handshaking with MCP server failed: connection closed: initialize response: connection closed: initialize response",
+        "failureReason": null,
+        "name": "forgewire-fabric",
+        "status": "failed",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417116752,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "clientId": null,
+          "content": [
+            {
+              "text": "This is a disposable runtime admission probe, not a registered benchmark task. Use your available file/command tools in the current workspace: read admission-fixture.txt, create admission-result.txt containing exactly 'probe tool operation complete', then return only JSON matching the supplied schema with probe_version 'wi022-ac3-admission.v1', status 'pass', and concise evidence.",
+              "text_elements": [],
+              "type": "text"
+            }
+          ],
+          "id": "01a0a192-5450-7772-88f7-787ea88dac08",
+          "type": "userMessage"
+        },
+        "startedAtMs": 1789417116752,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417116752,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417116752,
+        "item": {
+          "clientId": null,
+          "content": [
+            {
+              "text": "This is a disposable runtime admission probe, not a registered benchmark task. Use your available file/command tools in the current workspace: read admission-fixture.txt, create admission-result.txt containing exactly 'probe tool operation complete', then return only JSON matching the supplied schema with probe_version 'wi022-ac3-admission.v1', status 'pass', and concise evidence.",
+              "text_elements": [],
+              "type": "text"
+            }
+          ],
+          "id": "01a0a192-5450-7772-88f7-787ea88dac08",
+          "type": "userMessage"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417117834,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa8569d0edc87d2a6582d94cffaf01c",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "startedAtMs": 1789417117834,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417118124,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": null,
+        "failureReason": null,
+        "name": "node_repl",
+        "status": "ready",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417118124,
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "error": null,
+        "failureReason": null,
+        "name": "codex_apps",
+        "status": "ready",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417119161,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417119161,
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa8569d0edc87d2a6582d94cffaf01c",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417124637,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "aggregatedOutput": null,
+          "command": "\"C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.exe\" -Command \"Get-Content -Raw -LiteralPath .\\\\admission-fixture.txt\"",
+          "commandActions": [
+            {
+              "command": "Get-Content -Raw -LiteralPath .\\admission-fixture.txt",
+              "name": "admission-fixture.txt",
+              "path": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg\\admission-fixture.txt",
+              "type": "read"
+            }
+          ],
+          "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+          "durationMs": null,
+          "exitCode": null,
+          "id": "exec-6bf2fae0-e30b-4213-a59b-8bce22b3b9c1",
+          "pluginId": null,
+          "processId": "36588",
+          "scriptPath": null,
+          "source": "unifiedExecStartup",
+          "status": "inProgress",
+          "type": "commandExecution"
+        },
+        "startedAtMs": 1789417124634,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417124980,
+      "method": "item/commandExecution/outputDelta",
+      "params": {
+        "delta": "WI022 disposable admission fixture\r\n",
+        "itemId": "exec-6bf2fae0-e30b-4213-a59b-8bce22b3b9c1",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417124980,
+      "method": "item/commandExecution/outputDelta",
+      "params": {
+        "delta": "\r\n",
+        "itemId": "exec-6bf2fae0-e30b-4213-a59b-8bce22b3b9c1",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417125006,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417125006,
+        "item": {
+          "aggregatedOutput": "WI022 disposable admission fixture\r\n\r\n",
+          "command": "\"C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.exe\" -Command \"Get-Content -Raw -LiteralPath .\\\\admission-fixture.txt\"",
+          "commandActions": [
+            {
+              "command": "Get-Content -Raw -LiteralPath .\\admission-fixture.txt",
+              "name": "admission-fixture.txt",
+              "path": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg\\admission-fixture.txt",
+              "type": "read"
+            }
+          ],
+          "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+          "durationMs": 371,
+          "exitCode": 0,
+          "id": "exec-6bf2fae0-e30b-4213-a59b-8bce22b3b9c1",
+          "pluginId": null,
+          "processId": "36588",
+          "scriptPath": null,
+          "source": "unifiedExecStartup",
+          "status": "completed",
+          "type": "commandExecution"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417125007,
+      "method": "thread/tokenUsage/updated",
+      "params": {
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "tokenUsage": {
+          "last": {
+            "cacheWriteInputTokens": 0,
+            "cachedInputTokens": 11008,
+            "inputTokens": 13948,
+            "outputTokens": 192,
+            "reasoningOutputTokens": 93,
+            "totalTokens": 14140
+          },
+          "modelContextWindow": 258400,
+          "total": {
+            "cacheWriteInputTokens": 0,
+            "cachedInputTokens": 11008,
+            "inputTokens": 13948,
+            "outputTokens": 192,
+            "reasoningOutputTokens": 93,
+            "totalTokens": 14140
+          }
+        },
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417125007,
+      "method": "account/rateLimits/updated",
+      "params": {
+        "rateLimits": {
+          "credits": {
+            "balance": "0",
+            "hasCredits": false,
+            "unlimited": false
+          },
+          "individualLimit": null,
+          "limitId": "codex",
+          "limitName": null,
+          "normalModelSlug": null,
+          "planType": "plus",
+          "primary": {
+            "resetsAt": 1789425336,
+            "usedPercent": 39,
+            "windowDurationMins": 300
+          },
+          "rateLimitReachedType": null,
+          "secondary": {
+            "resetsAt": 1789923089,
+            "usedPercent": 50,
+            "windowDurationMins": 10080
+          },
+          "spendControlReached": null
+        }
+      }
+    },
+    {
+      "emittedAtMs": 1789417127150,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa856a667a087d2b1dd770cfda2ef04",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "startedAtMs": 1789417127150,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417129629,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417129629,
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa856a667a087d2b1dd770cfda2ef04",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417130416,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "changes": [
+            {
+              "diff": "probe tool operation complete\n",
+              "kind": {
+                "type": "add"
+              },
+              "path": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg\\admission-result.txt"
+            }
+          ],
+          "id": "exec-dc5f0c48-2157-4169-b40f-dfa2c63aeda2",
+          "status": "inProgress",
+          "type": "fileChange"
+        },
+        "startedAtMs": 1789417130416,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417132461,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417132461,
+        "item": {
+          "changes": [
+            {
+              "diff": "probe tool operation complete\n",
+              "kind": {
+                "type": "add"
+              },
+              "path": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg\\admission-result.txt"
+            }
+          ],
+          "id": "exec-dc5f0c48-2157-4169-b40f-dfa2c63aeda2",
+          "status": "completed",
+          "type": "fileChange"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417132461,
+      "method": "turn/diff/updated",
+      "params": {
+        "diff": "diff --git a/admission-result.txt b/admission-result.txt\nnew file mode 100644\nindex 0000000000000000000000000000000000000000..7e9b675b689f6b73be99851711dbfc448fd2ee8c\n--- /dev/null\n+++ b/admission-result.txt\n@@ -0,0 +1 @@\n+probe tool operation complete\n",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417132462,
+      "method": "thread/tokenUsage/updated",
+      "params": {
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "tokenUsage": {
+          "last": {
+            "cacheWriteInputTokens": 0,
+            "cachedInputTokens": 13056,
+            "inputTokens": 14169,
+            "outputTokens": 267,
+            "reasoningOutputTokens": 190,
+            "totalTokens": 14436
+          },
+          "modelContextWindow": 258400,
+          "total": {
+            "cacheWriteInputTokens": 0,
+            "cachedInputTokens": 24064,
+            "inputTokens": 28117,
+            "outputTokens": 459,
+            "reasoningOutputTokens": 283,
+            "totalTokens": 28576
+          }
+        },
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417132462,
+      "method": "account/rateLimits/updated",
+      "params": {
+        "rateLimits": {
+          "credits": {
+            "balance": "0",
+            "hasCredits": false,
+            "unlimited": false
+          },
+          "individualLimit": null,
+          "limitId": "codex",
+          "limitName": null,
+          "normalModelSlug": null,
+          "planType": "plus",
+          "primary": {
+            "resetsAt": 1789425336,
+            "usedPercent": 39,
+            "windowDurationMins": 300
+          },
+          "rateLimitReachedType": null,
+          "secondary": {
+            "resetsAt": 1789923089,
+            "usedPercent": 50,
+            "windowDurationMins": 10080
+          },
+          "spendControlReached": null
+        }
+      }
+    },
+    {
+      "emittedAtMs": 1789417132462,
+      "method": "turn/diff/updated",
+      "params": {
+        "diff": "diff --git a/admission-result.txt b/admission-result.txt\nnew file mode 100644\nindex 0000000000000000000000000000000000000000..7e9b675b689f6b73be99851711dbfc448fd2ee8c\n--- /dev/null\n+++ b/admission-result.txt\n@@ -0,0 +1 @@\n+probe tool operation complete\n",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417133532,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa856acc98887d2bb4ed337a080e44c",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "startedAtMs": 1789417133532,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417134348,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417134348,
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa856acc98887d2bb4ed337a080e44c",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417139656,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "aggregatedOutput": null,
+          "command": "\"C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.exe\" -Command '$p = [System.IO.Path]::GetFullPath('\"'.\\\\admission-result.txt'); \"'$b = [System.IO.File]::ReadAllBytes($p); [PSCustomObject]@{Path=$p; Length=$b.Length; Text=[System.Text.Encoding]::UTF8.GetString($b)} | ConvertTo-Json -Compress'",
+          "commandActions": [
+            {
+              "command": "$p = [System.IO.Path]::GetFullPath('.\\admission-result.txt'); $b = [System.IO.File]::ReadAllBytes($p); [PSCustomObject]@{Path=$p; Length=$b.Length; Text=[System.Text.Encoding]::UTF8.GetString($b)} | ConvertTo-Json -Compress",
+              "type": "unknown"
+            }
+          ],
+          "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+          "durationMs": null,
+          "exitCode": null,
+          "id": "exec-781feffd-74f4-447e-9c4e-a2816c707936",
+          "pluginId": null,
+          "processId": "98080",
+          "scriptPath": null,
+          "source": "unifiedExecStartup",
+          "status": "inProgress",
+          "type": "commandExecution"
+        },
+        "startedAtMs": 1789417139655,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417140036,
+      "method": "item/commandExecution/outputDelta",
+      "params": {
+        "delta": "{\"Path\":\"C:\\\\Users\\\\jerem\\\\AppData\\\\Local\\\\Temp\\\\wi022-admission-gpt-5-6-pjyk6ytg\\\\admission-result.txt\",\"Length\":30,\"Text\":\"probe tool operation complete\\n\"}",
+        "itemId": "exec-781feffd-74f4-447e-9c4e-a2816c707936",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417140036,
+      "method": "item/commandExecution/outputDelta",
+      "params": {
+        "delta": "\r\n",
+        "itemId": "exec-781feffd-74f4-447e-9c4e-a2816c707936",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417140060,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417140060,
+        "item": {
+          "aggregatedOutput": "{\"Path\":\"C:\\\\Users\\\\jerem\\\\AppData\\\\Local\\\\Temp\\\\wi022-admission-gpt-5-6-pjyk6ytg\\\\admission-result.txt\",\"Length\":30,\"Text\":\"probe tool operation complete\\n\"}\r\n",
+          "command": "\"C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.exe\" -Command '$p = [System.IO.Path]::GetFullPath('\"'.\\\\admission-result.txt'); \"'$b = [System.IO.File]::ReadAllBytes($p); [PSCustomObject]@{Path=$p; Length=$b.Length; Text=[System.Text.Encoding]::UTF8.GetString($b)} | ConvertTo-Json -Compress'",
+          "commandActions": [
+            {
+              "command": "$p = [System.IO.Path]::GetFullPath('.\\admission-result.txt'); $b = [System.IO.File]::ReadAllBytes($p); [PSCustomObject]@{Path=$p; Length=$b.Length; Text=[System.Text.Encoding]::UTF8.GetString($b)} | ConvertTo-Json -Compress",
+              "type": "unknown"
+            }
+          ],
+          "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+          "durationMs": 404,
+          "exitCode": 0,
+          "id": "exec-781feffd-74f4-447e-9c4e-a2816c707936",
+          "pluginId": null,
+          "processId": "98080",
+          "scriptPath": null,
+          "source": "unifiedExecStartup",
+          "status": "completed",
+          "type": "commandExecution"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417140061,
+      "method": "thread/tokenUsage/updated",
+      "params": {
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "tokenUsage": {
+          "last": {
+            "cacheWriteInputTokens": 0,
+            "cachedInputTokens": 13056,
+            "inputTokens": 14460,
+            "outputTokens": 214,
+            "reasoningOutputTokens": 60,
+            "totalTokens": 14674
+          },
+          "modelContextWindow": 258400,
+          "total": {
+            "cacheWriteInputTokens": 0,
+            "cachedInputTokens": 37120,
+            "inputTokens": 42577,
+            "outputTokens": 673,
+            "reasoningOutputTokens": 343,
+            "totalTokens": 43250
+          }
+        },
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417140061,
+      "method": "account/rateLimits/updated",
+      "params": {
+        "rateLimits": {
+          "credits": {
+            "balance": "0",
+            "hasCredits": false,
+            "unlimited": false
+          },
+          "individualLimit": null,
+          "limitId": "codex",
+          "limitName": null,
+          "normalModelSlug": null,
+          "planType": "plus",
+          "primary": {
+            "resetsAt": 1789425336,
+            "usedPercent": 40,
+            "windowDurationMins": 300
+          },
+          "rateLimitReachedType": null,
+          "secondary": {
+            "resetsAt": 1789923089,
+            "usedPercent": 50,
+            "windowDurationMins": 10080
+          },
+          "spendControlReached": null
+        }
+      }
+    },
+    {
+      "emittedAtMs": 1789417140061,
+      "method": "turn/diff/updated",
+      "params": {
+        "diff": "diff --git a/admission-result.txt b/admission-result.txt\nnew file mode 100644\nindex 0000000000000000000000000000000000000000..7e9b675b689f6b73be99851711dbfc448fd2ee8c\n--- /dev/null\n+++ b/admission-result.txt\n@@ -0,0 +1 @@\n+probe tool operation complete\n",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417140998,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa856b43e0c87d29129b93a9b08a028",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "startedAtMs": 1789417140998,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417147335,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417147335,
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa856b43e0c87d29129b93a9b08a028",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417147335,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa856ba752087d2ba2f398c7fb3dded",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "startedAtMs": 1789417147335,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417153525,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417153525,
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa856ba752087d2ba2f398c7fb3dded",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417153525,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa856c0b06887d2bcb82993bce86f15",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "startedAtMs": 1789417153525,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157746,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417157746,
+        "item": {
+          "content": [],
+          "id": "rs_0bf1e19e317c48e1016aa856c0b06887d2bcb82993bce86f15",
+          "summary": [],
+          "type": "reasoning"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157746,
+      "method": "item/started",
+      "params": {
+        "item": {
+          "delivery": null,
+          "id": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+          "memoryCitation": null,
+          "phase": "final_answer",
+          "questions": null,
+          "text": "",
+          "type": "agentMessage"
+        },
+        "startedAtMs": 1789417157746,
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157746,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "{\"",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157803,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "probe",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157803,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "_version",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157803,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "\":\"",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157803,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "wi",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157803,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "022",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157803,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "-ac",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157803,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "3",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157926,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "-ad",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157926,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "mission",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157926,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": ".v",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157926,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "1",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157926,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "\",\"",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157926,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "status",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417157927,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "\":\"",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "pass",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "\",\"",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "e",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "vidence",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "\":[\"",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "Read",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": " admission",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "-fi",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "xture",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": ".txt",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": " successfully",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": ".\",\"",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158079,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "Created",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158179,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": " admission",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158179,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "-result",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158179,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": ".txt",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158179,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": " with",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158179,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": " the",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158179,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": " requested",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158179,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": " text",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158179,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": ".",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158179,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "\"]",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158179,
+      "method": "item/agentMessage/delta",
+      "params": {
+        "delta": "}",
+        "itemId": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158334,
+      "method": "item/completed",
+      "params": {
+        "completedAtMs": 1789417158334,
+        "item": {
+          "delivery": null,
+          "id": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+          "memoryCitation": null,
+          "phase": "final_answer",
+          "questions": null,
+          "text": "{\"probe_version\":\"wi022-ac3-admission.v1\",\"status\":\"pass\",\"evidence\":[\"Read admission-fixture.txt successfully.\",\"Created admission-result.txt with the requested text.\"]}",
+          "type": "agentMessage"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158507,
+      "method": "thread/tokenUsage/updated",
+      "params": {
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "tokenUsage": {
+          "last": {
+            "cacheWriteInputTokens": 0,
+            "cachedInputTokens": 14080,
+            "inputTokens": 14749,
+            "outputTokens": 1436,
+            "reasoningOutputTokens": 1386,
+            "totalTokens": 16185
+          },
+          "modelContextWindow": 258400,
+          "total": {
+            "cacheWriteInputTokens": 0,
+            "cachedInputTokens": 51200,
+            "inputTokens": 57326,
+            "outputTokens": 2109,
+            "reasoningOutputTokens": 1729,
+            "totalTokens": 59435
+          }
+        },
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158507,
+      "method": "account/rateLimits/updated",
+      "params": {
+        "rateLimits": {
+          "credits": {
+            "balance": "0",
+            "hasCredits": false,
+            "unlimited": false
+          },
+          "individualLimit": null,
+          "limitId": "codex",
+          "limitName": null,
+          "normalModelSlug": null,
+          "planType": "plus",
+          "primary": {
+            "resetsAt": 1789425336,
+            "usedPercent": 40,
+            "windowDurationMins": 300
+          },
+          "rateLimitReachedType": null,
+          "secondary": {
+            "resetsAt": 1789923089,
+            "usedPercent": 50,
+            "windowDurationMins": 10080
+          },
+          "spendControlReached": null
+        }
+      }
+    },
+    {
+      "emittedAtMs": 1789417158507,
+      "method": "turn/diff/updated",
+      "params": {
+        "diff": "diff --git a/admission-result.txt b/admission-result.txt\nnew file mode 100644\nindex 0000000000000000000000000000000000000000..7e9b675b689f6b73be99851711dbfc448fd2ee8c\n--- /dev/null\n+++ b/admission-result.txt\n@@ -0,0 +1 @@\n+probe tool operation complete\n",
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turnId": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158623,
+      "method": "thread/status/changed",
+      "params": {
+        "status": {
+          "type": "idle"
+        },
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb"
+      }
+    },
+    {
+      "emittedAtMs": 1789417158623,
+      "method": "turn/completed",
+      "params": {
+        "threadId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+        "turn": {
+          "completedAt": 1789417158,
+          "durationMs": 46322,
+          "error": null,
+          "id": "01a0a192-42bd-7f63-a8a7-4e9435e0357b",
+          "items": [
+            {
+              "delivery": null,
+              "id": "msg_0bf1e19e317c48e1016aa856c4faa087d29e0ba3408b2c8430",
+              "memoryCitation": null,
+              "phase": "final_answer",
+              "questions": null,
+              "text": "{\"probe_version\":\"wi022-ac3-admission.v1\",\"status\":\"pass\",\"evidence\":[\"Read admission-fixture.txt successfully.\",\"Created admission-result.txt with the requested text.\"]}",
+              "type": "agentMessage"
+            }
+          ],
+          "itemsView": "summary",
+          "startedAt": 1789417112,
+          "status": "completed"
+        }
+      }
+    }
+  ],
+  "runtime_identity": {
+    "command": "codex app-server --stdio",
+    "executor_version": "repopact.codex-empirical.v1",
+    "initialize_result": {
+      "id": 1,
+      "result": {
+        "codexHome": "C:\\Users\\jerem\\.codex",
+        "platformFamily": "windows",
+        "platformOs": "windows",
+        "userAgent": "Codex Desktop/0.154.0-alpha.6.2 (Windows 10.0.26200; x86_64) dumb (repopact-pactbench; 1)"
+      }
+    },
+    "process_lifecycle": {
+      "accepted_usage_count": 4,
+      "final_usage_reconciled": true,
+      "owned_process_command": [
+        "codex",
+        "app-server",
+        "--stdio"
+      ],
+      "owned_process_pid": 12432,
+      "process_terminated": true,
+      "public_command_process_ids": [
+        36588,
+        98080
+      ],
+      "public_command_process_status": [
+        {
+          "pid": 36588,
+          "status": "exited",
+          "winerror": 87
+        },
+        {
+          "pid": 98080,
+          "status": "exited",
+          "winerror": 87
+        }
+      ],
+      "public_command_processes_terminated": true,
+      "returncode": 1,
+      "termination_method": "terminate",
+      "turn_completed_elapsed_ms": 46939.80029999511,
+      "turn_completed_observed": true
+    },
+    "runtime_version": "codex-cli-public-app-server-v2",
+    "thread_result": {
+      "id": 2,
+      "result": {
+        "activePermissionProfile": null,
+        "approvalPolicy": "never",
+        "approvalsReviewer": "user",
+        "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+        "instructionSources": [],
+        "model": "gpt-5.6-luna",
+        "modelProvider": "openai",
+        "multiAgentMode": "explicitRequestOnly",
+        "reasoningEffort": "xhigh",
+        "runtimeWorkspaceRoots": [
+          "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg"
+        ],
+        "sandbox": {
+          "excludeSlashTmp": false,
+          "excludeTmpdirEnvVar": false,
+          "networkAccess": false,
+          "type": "workspaceWrite",
+          "writableRoots": []
+        },
+        "serviceTier": "priority",
+        "thread": {
+          "agentNickname": null,
+          "agentRole": null,
+          "canAcceptDirectInput": true,
+          "cliVersion": "0.154.0-alpha.6.2",
+          "createdAt": 1789417112,
+          "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+          "daybreakEnabled": null,
+          "environments": [
+            {
+              "cwd": "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg",
+              "environmentId": "local",
+              "runtimeWorkspaceRoots": [
+                "C:\\Users\\jerem\\AppData\\Local\\Temp\\wi022-admission-gpt-5-6-pjyk6ytg"
+              ]
+            }
+          ],
+          "ephemeral": true,
+          "extra": null,
+          "forkedFromId": null,
+          "gitInfo": null,
+          "historyMode": "legacy",
+          "id": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+          "model": "gpt-5.6-luna",
+          "modelProvider": "openai",
+          "name": null,
+          "originator": "Codex Desktop",
+          "parentThreadId": null,
+          "path": null,
+          "preview": "",
+          "projectId": null,
+          "reasoningEffort": "xhigh",
+          "recencyAt": 1789417112,
+          "section": null,
+          "sectionEnteredAt": null,
+          "sessionId": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+          "source": "vscode",
+          "status": {
+            "type": "idle"
+          },
+          "threadSource": null,
+          "turns": [],
+          "updatedAt": 1789417112
+        }
+      }
+    }
+  },
+  "schema_identity": {
+    "schema": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "probe_version": {
+          "const": "wi022-ac3-admission.v1",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "probe_version",
+        "status",
+        "evidence"
+      ],
+      "type": "object"
+    },
+    "schema_digest": "3ca5e023a4b7054177fdc52851e72c27de08ed9b37005fca3ec57dd288099595"
+  },
+  "server_requests": [],
+  "telemetry": {
+    "accepted_request_count": 4,
+    "aggregate": {
+      "cache_adjusted_input_tokens": 6126,
+      "cache_write_input_tokens": 0,
+      "cached_input_tokens": 51200,
+      "cached_tokens": 51200,
+      "context_tokens": 57253,
+      "elapsed_ms": 46823.759,
+      "input_tokens": 57326,
+      "model": "gpt-5.6-luna",
+      "output_tokens": 2109,
+      "pricing_id": "chatgpt-subscription-unmetered-2026-09-14",
+      "provider": "openai",
+      "reasoning_output_tokens": 1729,
+      "requests": 4,
+      "task_tokens": 73,
+      "tool_calls": 2,
+      "usd": 0.0
+    },
+    "pricing_id": "chatgpt-subscription-unmetered-2026-09-14",
+    "provider_usage": [
+      {
+        "elapsed_ms_observed": 13323.736,
+        "last": {
+          "cache_write_input_tokens": 0,
+          "cached_input_tokens": 11008,
+          "input_tokens": 13948,
+          "output_tokens": 192,
+          "reasoning_output_tokens": 93,
+          "total_tokens": 14140
+        },
+        "notification_event_index": 26,
+        "sequence": 1,
+        "total": {
+          "cache_write_input_tokens": 0,
+          "cached_input_tokens": 11008,
+          "input_tokens": 13948,
+          "output_tokens": 192,
+          "reasoning_output_tokens": 93,
+          "total_tokens": 14140
+        }
+      },
+      {
+        "elapsed_ms_observed": 20778.769,
+        "last": {
+          "cache_write_input_tokens": 0,
+          "cached_input_tokens": 13056,
+          "input_tokens": 14169,
+          "output_tokens": 267,
+          "reasoning_output_tokens": 190,
+          "total_tokens": 14436
+        },
+        "notification_event_index": 33,
+        "sequence": 2,
+        "total": {
+          "cache_write_input_tokens": 0,
+          "cached_input_tokens": 24064,
+          "input_tokens": 28117,
+          "output_tokens": 459,
+          "reasoning_output_tokens": 283,
+          "total_tokens": 28576
+        }
+      },
+      {
+        "elapsed_ms_observed": 28378.2,
+        "last": {
+          "cache_write_input_tokens": 0,
+          "cached_input_tokens": 13056,
+          "input_tokens": 14460,
+          "output_tokens": 214,
+          "reasoning_output_tokens": 60,
+          "total_tokens": 14674
+        },
+        "notification_event_index": 42,
+        "sequence": 3,
+        "total": {
+          "cache_write_input_tokens": 0,
+          "cached_input_tokens": 37120,
+          "input_tokens": 42577,
+          "output_tokens": 673,
+          "reasoning_output_tokens": 343,
+          "total_tokens": 43250
+        }
+      },
+      {
+        "elapsed_ms_observed": 46823.759,
+        "last": {
+          "cache_write_input_tokens": 0,
+          "cached_input_tokens": 14080,
+          "input_tokens": 14749,
+          "output_tokens": 1436,
+          "reasoning_output_tokens": 1386,
+          "total_tokens": 16185
+        },
+        "notification_event_index": 91,
+        "sequence": 4,
+        "total": {
+          "cache_write_input_tokens": 0,
+          "cached_input_tokens": 51200,
+          "input_tokens": 57326,
+          "output_tokens": 2109,
+          "reasoning_output_tokens": 1729,
+          "total_tokens": 59435
+        }
+      },
+      {
+        "model_context_window": 258400
+      },
+      {
+        "model_context_window": 258400
+      },
+      {
+        "model_context_window": 258400
+      },
+      {
+        "model_context_window": 258400
+      }
+    ],
+    "source": "public Codex app-server thread/tokenUsage/updated",
+    "task_token_attribution": {
+      "encoding": "o200k_base",
+      "first_request_only": true,
+      "task_tokens": 73,
+      "tokenizer_package": "tiktoken",
+      "tokenizer_version": "0.9.0"
+    },
+    "usd_policy": "public Codex app-server does not expose a rate card here; USD is recorded as 0 and never inferred"
+  },
+  "thread_id": "01a0a192-4154-71b2-b4e3-cb9f0a594ceb",
+  "tool_calls": 2,
+  "turn_completed_elapsed_ms": 46939.80029999511,
+  "turn_id": "01a0a192-42bd-7f63-a8a7-4e9435e0357b"
+}
