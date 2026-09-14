@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "repopact.experiment-run.v2",
+  "title": "RepoPact v2 study-neutral experiment run",
+  "type": "object",
+  "required": ["schema_version", "study_id", "case_id", "condition", "fixture", "fixture_version", "repetition", "seed", "model", "temperature_policy", "scorer_version", "completed", "success", "per_request", "aggregate", "observations", "illustrative"],
+  "properties": {
+    "schema_version": {"const": "repopact.experiment-run.v2"},
+    "study_id": {"type": "string", "minLength": 1},
+    "case_id": {"type": "string", "minLength": 1},
+    "condition": {"type": "string", "minLength": 1},
+    "fixture": {"type": "string", "minLength": 1},
+    "fixture_version": {"type": "string", "minLength": 1},
+    "repetition": {"type": "integer", "minimum": 0},
+    "seed": {},
+    "model": {"type": "object", "required": ["family", "provider", "version"], "properties": {"family": {"type": "string", "minLength": 1}, "provider": {"type": "string", "minLength": 1}, "version": {"type": "string", "minLength": 1}}},
+    "temperature_policy": {"type": "string", "minLength": 1},
+    "scorer_version": {"type": "string", "minLength": 1},
+    "started_at": {"type": ["string", "null"]},
+    "ended_at": {"type": ["string", "null"]},
+    "elapsed_ms": {"type": ["number", "null"], "minimum": 0},
+    "completed": {"type": "boolean"},
+    "success": {"type": "boolean"},
+    "failure_class": {"type": ["string", "null"]},
+    "per_request": {"type": "array", "items": {"$ref": "#/$defs/requestTelemetry"}},
+    "aggregate": {"$ref": "#/$defs/aggregateTelemetry"},
+    "observations": {"type": "object"},
+    "raw_capture_ref": {"type": ["string", "null"]},
+    "exact_command": {"type": ["string", "null"]},
+    "provenance": {"type": "object"},
+    "notes": {"type": "string"},
+    "illustrative": {"type": "boolean"}
+  },
+  "$defs": {
+    "requestTelemetry": {
+      "type": "object",
+      "required": ["input_tokens", "cached_input_tokens", "cache_write_input_tokens", "output_tokens", "reasoning_output_tokens", "context_tokens", "task_tokens", "cache_adjusted_input_tokens", "requests", "usd", "pricing_id", "provider", "model", "tool_calls", "elapsed_ms"],
+      "properties": {
+        "input_tokens": {"type": "integer", "minimum": 0},
+        "cached_input_tokens": {"type": "integer", "minimum": 0},
+        "cache_write_input_tokens": {"type": "integer", "minimum": 0},
+        "output_tokens": {"type": "integer", "minimum": 0},
+        "reasoning_output_tokens": {"type": "integer", "minimum": 0},
+        "context_tokens": {"type": "integer", "minimum": 0},
+        "task_tokens": {"type": "integer", "minimum": 0},
+        "cache_adjusted_input_tokens": {"type": "integer", "minimum": 0},
+        "requests": {"const": 1},
+        "usd": {"type": "number", "minimum": 0},
+        "pricing_id": {"type": "string", "minLength": 1},
+        "provider": {"type": "string", "minLength": 1},
+        "model": {"type": "string", "minLength": 1},
+        "tool_calls": {"type": "integer", "minimum": 0},
+        "elapsed_ms": {"type": "number", "minimum": 0}
+      }
+    },
+    "aggregateTelemetry": {
+      "type": "object",
+      "required": ["input_tokens", "cached_input_tokens", "cache_write_input_tokens", "output_tokens", "reasoning_output_tokens", "context_tokens", "task_tokens", "cache_adjusted_input_tokens", "requests", "usd", "pricing_id", "provider", "model", "tool_calls", "elapsed_ms"],
+      "properties": {
+        "input_tokens": {"type": "integer", "minimum": 0},
+        "cached_input_tokens": {"type": "integer", "minimum": 0},
+        "cache_write_input_tokens": {"type": "integer", "minimum": 0},
+        "output_tokens": {"type": "integer", "minimum": 0},
+        "reasoning_output_tokens": {"type": "integer", "minimum": 0},
+        "context_tokens": {"type": "integer", "minimum": 0},
+        "task_tokens": {"type": "integer", "minimum": 0},
+        "cache_adjusted_input_tokens": {"type": "integer", "minimum": 0},
+        "requests": {"type": "integer", "minimum": 0},
+        "usd": {"type": "number", "minimum": 0},
+        "pricing_id": {"type": "string", "minLength": 1},
+        "provider": {"type": "string", "minLength": 1},
+        "model": {"type": "string", "minLength": 1},
+        "tool_calls": {"type": "integer", "minimum": 0},
+        "elapsed_ms": {"type": "number", "minimum": 0}
+      }
+    }
+  }
+}

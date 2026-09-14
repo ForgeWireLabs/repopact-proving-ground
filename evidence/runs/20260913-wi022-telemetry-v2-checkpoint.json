@@ -1,0 +1,107 @@
+{
+  "$schema": "../../schemas/evidence-run.schema.json",
+  "id": "20260913-wi022-telemetry-v2-checkpoint",
+  "timestamp": "2026-09-13T23:59:00-05:00",
+  "work_item": "022",
+  "result": "passed",
+  "provenance": "concrete",
+  "repository_refs": {
+    "repopact_main_start_sha": "542cd5c01a79942ecb78040b19deb4e82f4f9068",
+    "proving_ground_master_start_sha": "43c05e6f5c4fccef2600bdf4bb1d12f4cd473ce7",
+    "historical_smoke": "evidence/runs/20260913-005-wi022-ac5-realrunner-smoke.json",
+    "historical_smoke_preserved": true,
+    "corrected_task_set_version": "pactbench-2026-09-14-materialized-v2",
+    "corrected_task_set_digest": "a9f490fb41cd47b366ff3f3268df92ea24400dd366cdf3f407587e9a5aafed54"
+  },
+  "scope": {
+    "model_calls": 0,
+    "reportable_comparative_runs": 0,
+    "second_ac5_smoke_run": false,
+    "ac3_started": false
+  },
+  "public_runtime_surface": {
+    "codex_version": "0.154.0-alpha.6.2",
+    "source": "Codex public app-server stdio protocol",
+    "notification": "thread/tokenUsage/updated",
+    "accepted_fields": [
+      "tokenUsage.last",
+      "tokenUsage.total",
+      "tokenUsage.modelContextWindow",
+      "inputTokens",
+      "cachedInputTokens",
+      "cacheWriteInputTokens",
+      "outputTokens",
+      "reasoningOutputTokens",
+      "totalTokens"
+    ],
+    "private_rollout_files_used": false,
+    "internal_raw_response_event_used": false,
+    "request_sandbox_policy": "workspaceWrite"
+  },
+  "telemetry_contract": {
+    "runner_contract_version": "repopact.real-runner.v2",
+    "envelope_schema_version": "repopact.experiment-run.v2",
+    "action_signal_version": "pactbench.action-signal.v1",
+    "request_definition": "one completed usage-bearing inference response",
+    "cumulative_ledger": "accept only advancing totals whose delta equals last; ignore exact duplicates; reject resets, backwards movement, gaps, or mismatches",
+    "cache_adjusted_definition": "input_tokens - cached_input_tokens; hard fail when cached input exceeds input",
+    "cache_write_preserved": true,
+    "usd_policy": "0 for authenticated ChatGPT subscription, recorded as policy rather than unavailable pricing",
+    "task_tokenizer": {
+      "package": "tiktoken",
+      "version": "0.9.0",
+      "encoding": "o200k_base",
+      "task_payload": "exact registered task instruction",
+      "subsequent_request_task_tokens": 0
+    },
+    "context_definition": "input_tokens - task_tokens",
+    "aggregate_definition": "exact sum of per-request additive telemetry"
+  },
+  "implementation": {
+    "materialization_gate": "benchmarks/pactbench/materialize.py",
+    "public_app_server_client": "benchmarks/harness/codex_app_server.py",
+    "usage_ledger": "benchmarks/harness/codex_usage.py",
+    "v2_contract_parser": "benchmarks/harness/runners.py",
+    "v2_smoke_adapter": "benchmarks/harness/codex_real_runner_v2.py",
+    "grader": "benchmarks/harness/grader_v2.py",
+    "tests": [
+      "tests/test_pactbench_materialization.py",
+      "tests/test_telemetry_v2.py"
+    ]
+  },
+  "validation": [
+    {
+      "command": "python -m benchmarks.pactbench.materialize --out evidence/audits/20260914-pactbench-executability.json",
+      "exit_code": 0,
+      "summary": "24 effective cases eligible; 0 effective preflight failures; 0 invalid grader contracts."
+    },
+    {
+      "command": "python -m unittest tests.test_pactbench_materialization tests.test_telemetry_v2 -v",
+      "exit_code": 0,
+      "summary": "20 deterministic integrity, action-signal, ledger, tokenizer, v2 parser, and materialization tests passed."
+    },
+    {
+      "command": "python -m py_compile benchmarks/harness/codex_app_server.py benchmarks/harness/codex_real_runner_v2.py benchmarks/harness/codex_usage.py benchmarks/harness/runners.py",
+      "exit_code": 0,
+      "summary": "Public app-server client and v2 adapter compile successfully."
+    },
+    {
+      "command": "codex --version; codex app-server generate-json-schema --out <temporary-directory> --experimental",
+      "exit_code": 0,
+      "summary": "Installed public schema inspected; tokenUsage notification and workspaceWrite request policy are present."
+    }
+  ],
+  "acceptance_boundary": {
+    "wi022_ac1": "unchanged_satisfied",
+    "wi022_ac2": "pending_until_live_v2_smoke",
+    "wi022_ac3": "pending_not_started",
+    "wi022_ac4": "unchanged_satisfied",
+    "wi022_ac5": "pending_first_smoke_non_reportable_preserved",
+    "wi020_ac2": "pending_until_integrity_reconciliation_is accepted in RepoPact bookkeeping"
+  },
+  "notes": [
+    "This is an implementation/protocol checkpoint, not a second AC-5 smoke.",
+    "The June registration and first September non-reportable smoke were not rewritten.",
+    "No result was selected or altered based on model behavior; no model behavior was observed in this checkpoint."
+  ]
+}

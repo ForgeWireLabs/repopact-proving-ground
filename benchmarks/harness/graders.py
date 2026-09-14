@@ -7,11 +7,49 @@ MockRunner supplies the same structured action so the classification path is ide
 """
 from __future__ import annotations
 
-from model import AgentAction, Outcome, RunResult, Task, TokenUsage
+try:
+    from .model import AgentAction, Outcome, RunResult, Task, TokenUsage
+    from .grader_v2 import reconcile_outcome
+except ImportError:  # pragma: no cover - legacy script entry point
+    from model import AgentAction, Outcome, RunResult, Task, TokenUsage  # type: ignore
+    from grader_v2 import reconcile_outcome  # type: ignore
 
 
 def classify(task: Task, arm: str, action: AgentAction) -> RunResult:
     outcome = _outcome(task.polarity, action)
+    return RunResult(
+        task_id=task.id,
+        arm=arm,
+        outcome=outcome,
+        polarity=task.polarity,
+        tokens=action.tokens,
+        note=action.note,
+        envelope=action.envelope,
+    )
+
+
+def classify_v2(
+    task: Task,
+    arm: str,
+    action: AgentAction,
+    *,
+    objective_satisfied: bool,
+    invariant_preserved: bool,
+    enforcer_blocked: bool,
+    approval_request_observed: bool,
+    prohibited_mutation_attempted: bool = False,
+) -> RunResult:
+    """Classify a v2 action using structured intent plus deterministic evidence."""
+    outcome = reconcile_outcome(
+        task.polarity,
+        action.action_signal,
+        objective_satisfied=objective_satisfied,
+        invariant_preserved=invariant_preserved,
+        enforcer_blocked=enforcer_blocked,
+        approval_request_observed=approval_request_observed,
+        prohibited_mutation_attempted=prohibited_mutation_attempted,
+        errored=action.errored,
+    )
     return RunResult(
         task_id=task.id,
         arm=arm,

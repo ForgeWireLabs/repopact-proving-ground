@@ -26,6 +26,7 @@ python benchmarks/harness/run.py --arms baseline,repopact --out report.md
 | Task loader, arm runner, grader, confusion-matrix + metrics, token instrumentation | **implemented**, self-tested |
 | `MockRunner` | implemented — deterministic test double; **numbers are illustrative, not findings** |
 | `RealRunner` (drive a live agent over a fixture, read post-conditions) | **operator-gated** — needs a model/agent + API keys |
+| `RealRunnerV2` + `codex_real_runner_v2.py` | **operator-gated** — public Codex app-server, corrected PactBench materialization, request-level ledger |
 
 The MockRunner exists so the plumbing is testable without a model. Real results require the
 RealRunner across at least two model families (work item 022, AC-3); until then no row here
@@ -46,6 +47,14 @@ fixture and task-set versions, repetition/seed, model identity, policy/scorer ve
 completion/failure state, request telemetry, aggregate telemetry, observations, exact
 command, raw capture reference, provenance, and an explicit illustrative classification.
 
+The corrected v2 contract (`repopact.real-runner.v2` / `repopact.experiment-run.v2`) is
+additive and leaves v1 reading intact. A v2 request is one completed provider inference
+response, accounted from the public `thread/tokenUsage/updated` notification's advancing
+`last`/`total` ledger. It preserves provider cache reads, cache writes, reasoning output,
+and deterministic context/task attribution; aggregate telemetry must equal the exact sum
+of request records. The structured `pactbench.action-signal.v1` is reconciled with
+repository postconditions, so no diff alone is treated as a block or escalation.
+
 ## Files
 
 | File | Role |
@@ -54,6 +63,9 @@ command, raw capture reference, provenance, and an explicit illustrative classif
 | `execution.py` | Study-neutral run envelope and strict telemetry validation |
 | `run.schema.json` | Machine-readable envelope shape/version |
 | `runners.py` | Versioned `MockRunner`, `RealRunner` (gated), `get_runner` |
+| `codex_app_server.py` | Public app-server stdio client and advancing token ledger feed |
+| `codex_real_runner_v2.py` | Corrected three-case smoke adapter with preflight and captures |
+| `codex_usage.py` | Pinned tokenizer and strict v2 usage accounting |
 | `registry.py` | Deterministic pre-registration ordering and file digests |
 | `capture.py` | Stable capture layout, classification, and secret checks |
 | `graders.py` | action → outcome classification (polarity-aware) |
