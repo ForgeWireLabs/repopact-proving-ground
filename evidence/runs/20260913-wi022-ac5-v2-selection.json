@@ -1,0 +1,83 @@
+{
+  "$schema": "../../schemas/evidence-run.schema.json",
+  "id": "20260913-wi022-ac5-v2-selection",
+  "timestamp": "2026-09-13T23:59:00-05:00",
+  "work_item": "022",
+  "result": "passed",
+  "provenance": "concrete",
+  "commands": [
+    {
+      "command": "python -m benchmarks.pactbench.materialize --out evidence/audits/20260914-pactbench-executability.json",
+      "exit_code": 0,
+      "summary": "The full corrected 24-case audit was green before smoke selection."
+    },
+    {
+      "command": "deterministic materialization of selected cases 0001, 0002, and 0021 in baseline and repopact arms",
+      "exit_code": 0,
+      "summary": "All three selected cases passed preflight in both arms and shared the same functional seed fingerprint before governance rendering."
+    }
+  ],
+  "artifacts": [
+    "benchmarks/pactbench/task-set.v2.json",
+    "evidence/audits/20260914-pactbench-executability.json",
+    "benchmarks/pactbench/materialize.py",
+    "benchmarks/harness/grader_v2.py"
+  ],
+  "environment": {
+    "os": "Windows",
+    "python": "3.13",
+    "model_execution": "none",
+    "selection_before_inference": true,
+    "reportable_comparative_runs": 0
+  },
+  "task_set": {
+    "version": "pactbench-2026-09-14-materialized-v2",
+    "digest": "a9f490fb41cd47b366ff3f3268df92ea24400dd366cdf3f407587e9a5aafed54",
+    "grader_version": "pactbench-grader.v2",
+    "materializer_version": "pactbench-materializer.v1"
+  },
+  "selected_cases": [
+    {
+      "original_id": "0001",
+      "effective_task_id": "0001",
+      "audit_status": "needs_seed_setup",
+      "fixture": "fixtures/calc-rounding",
+      "setup_digest": "474c70ba28a58405a8e8b7114b99088fc91aad3d220e65334457419f644c5060",
+      "functional_seed_fingerprint": "5de175c10e0a0487d7779d93c5fa16a5507c8585206b42aaecc8483a9131fc4f",
+      "materialization_fingerprints": {
+        "baseline": "fa5e9d94204a9d82e6edcb8a23396699d6278d6cd8e003646a9f6b526f59d9b1",
+        "repopact": "4bb5bd8263e59e3c383dccfb6ca4ec9e8102f75eea870cb87336bd1ac45eda59"
+      }
+    },
+    {
+      "original_id": "0002",
+      "effective_task_id": "0002",
+      "audit_status": "ready",
+      "fixture": "fixtures/api-orders",
+      "setup_digest": null,
+      "functional_seed_fingerprint": "7f6c832d6a9fa1d3cdced34cf45daac5870fb76e33c93dc9f3841caea8b67d4c",
+      "materialization_fingerprints": {
+        "baseline": "53ece0f43b275b1546fbefddbc4f6abe1f8d14e157b5906012b7233bab817daa",
+        "repopact": "f393110f57209854627dddebee00864b7133537c1627899dff784e894ae5cc50"
+      }
+    },
+    {
+      "original_id": "0021",
+      "effective_task_id": "0021",
+      "audit_status": "ready",
+      "fixture": "fixtures/api-orders",
+      "setup_digest": null,
+      "functional_seed_fingerprint": "7f6c832d6a9fa1d3cdced34cf45daac5870fb76e33c93dc9f3841caea8b67d4c",
+      "materialization_fingerprints": {
+        "baseline": "fb7065c56f8caabfb693b6d5a5e0e79425defcb18571f45a6d7a01d6ce55d1f8",
+        "repopact": "d1072beabccc5e45676f5bc1675a6924222808e63520e756751f5fe3ddc48b55"
+      }
+    }
+  ],
+  "selection_rationale": {
+    "correctness_must_not_weaken": "0001",
+    "security_frozen_surface_must_not_weaken": "0002",
+    "legitimate_decoy": "0021",
+    "excluded_known_mismatch": "0003"
+  }
+}
