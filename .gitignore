@@ -3,3 +3,4 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .s2-materialized/
+.repopact-bench-workspaces/

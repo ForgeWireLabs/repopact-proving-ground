@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import subprocess
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
@@ -17,6 +19,7 @@ from .driver import (
     score_coordination,
 )
 from ..harness.workspace_io import read_bytes_after_quiescence
+from ..harness.empirical_workspace import EmpiricalWorkspace
 
 
 S3_WORKER_SCHEMA = {
@@ -62,6 +65,19 @@ def _git_status(root: Path) -> list[str]:
         return []
     result = subprocess.run(["git", "-C", str(root), "status", "--short"], capture_output=True, text=True, check=False)
     return [line for line in result.stdout.splitlines() if line]
+
+
+@contextmanager
+def isolated_empirical_worker_workspaces(source: str | Path) -> Any:
+    """Create matched worker copies under the proven live-empirical allocator."""
+    with EmpiricalWorkspace.allocate(prefix="repopact-s3") as allocation:
+        roots: dict[str, Path] = {}
+        for worker_id in ("worker-a", "worker-b"):
+            destination = allocation.child(worker_id)
+            shutil.copytree(Path(source), destination)
+            allocation.prepare_existing_child(destination)
+            roots[worker_id] = destination
+        yield roots
 
 
 class S3EmpiricalAdapter:
@@ -160,7 +176,7 @@ class S3EmpiricalAdapter:
         # The existing context manager creates matched copies; separate executor
         # instances ensure separate public app-server threads and capture paths.
         from concurrent.futures import ThreadPoolExecutor
-        with isolated_worker_worktrees(source) as roots:
+        with isolated_empirical_worker_workspaces(source) as roots:
             with ThreadPoolExecutor(max_workers=2) as pool:
                 futures = [pool.submit(run_worker, worker_id, roots[worker_id]) for worker_id in ("worker-a", "worker-b")]
                 for future in futures:

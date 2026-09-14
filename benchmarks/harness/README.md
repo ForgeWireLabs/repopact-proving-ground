@@ -65,6 +65,7 @@ repository postconditions, so no diff alone is treated as a block or escalation.
 | `runners.py` | Versioned `MockRunner`, `RealRunner` (gated), `get_runner` |
 | `codex_app_server.py` | Public app-server stdio client and advancing token ledger feed |
 | `empirical.py` | Shared strict-schema empirical turn, telemetry, capture, and provenance boundary |
+| `empirical_workspace.py` | Windows-safe disposable live workspace allocator, ACL profile, direct-sandbox preflight, and security fingerprint |
 | `ac3_execution_manifest.py` | Generates the pre-inference AC-3 manifest; it never starts a cell |
 | `admission_probe.py` | One-shot disposable family admission probe, outside the registered matrix |
 | `codex_real_runner_v2.py` | Corrected three-case smoke adapter with preflight and captures |
@@ -90,3 +91,10 @@ verified pinned materialization plus a study-built functional/evaluation bed;
 uses the frozen local renderers in `s4/operationalization.py`; and `s6a`/`s6b`
 require objective filesystem/postcondition evaluators. The existing deterministic
 drivers and S5 fixture self-tests remain illustrative/non-empirical.
+
+On Windows, live empirical workspaces are allocated below `REPOPACT_BENCH_WORK_ROOT`
+when set, or the repository's `.repopact-bench-workspaces` directory by default. The
+allocator avoids Python temp-directory defaults, applies a disposable protected DACL with
+explicit host and Codex sandbox-user SIDs, validates path/reparse safety, and proves
+host read/write plus direct sandbox create/modify/read-back before an app-server turn.
+The normalized ACL digest and preflight result are recorded in empirical provenance.

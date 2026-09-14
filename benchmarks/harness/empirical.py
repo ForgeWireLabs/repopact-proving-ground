@@ -17,6 +17,7 @@ from typing import Any
 from .capture import assert_no_secrets
 from .codex_app_server import AppServerRun, CodexAppServer
 from .codex_usage import AcceptedUsage, UsageLedgerError, task_token_count
+from .empirical_workspace import EmpiricalWorkspace, EmpiricalWorkspaceError, WORKSPACE_SECURITY_VERSION
 from .execution import (
     REAL_RUNNER_CONTRACT_VERSION_V2,
     RUN_SCHEMA_VERSION_V2,
@@ -179,6 +180,14 @@ class EmpiricalTurn:
             raise EmpiricalContractError("empirical turn provenance must be classified empirical")
         if self.provenance.get("executor_version") != EMPIRICAL_EXECUTOR_VERSION:
             raise EmpiricalContractError("empirical turn provenance has no recognized executor version")
+        workspace_security = self.provenance.get("workspace_security")
+        if not isinstance(workspace_security, dict) or workspace_security.get("version") != WORKSPACE_SECURITY_VERSION:
+            raise EmpiricalContractError("empirical turn requires the proven workspace security contract")
+        if not isinstance(workspace_security.get("fingerprint"), str) or len(workspace_security["fingerprint"]) != 64:
+            raise EmpiricalContractError("empirical turn requires a workspace security fingerprint")
+        preflight = workspace_security.get("preflight")
+        if not isinstance(preflight, dict) or not preflight or not all(value is True for value in preflight.values()):
+            raise EmpiricalContractError("empirical turn requires a passing workspace security preflight")
         if not self.capture_ref or len(self.capture_digest) != 64:
             raise EmpiricalContractError("empirical turn requires a capture reference and digest")
         if not self.runtime_identity.get("command") or not self.runtime_identity.get("initialize_result"):
@@ -257,6 +266,7 @@ class EmpiricalExecutor:
         timeout_seconds: int = 1800,
         output_schema: dict[str, Any],
         runtime_version: str = "codex-cli-public-app-server-v2",
+        workspace_root: str | Path | None = None,
     ) -> None:
         if (
             not isinstance(output_schema, dict)
@@ -272,6 +282,7 @@ class EmpiricalExecutor:
         self.timeout_seconds = timeout_seconds
         self.output_schema = output_schema
         self.runtime_version = runtime_version
+        self.workspace_root = workspace_root
 
     def run(
         self,
@@ -292,6 +303,10 @@ class EmpiricalExecutor:
             raise EmpiricalContractError("empirical prompt must be non-empty")
         if not workspace_identity:
             raise EmpiricalContractError("empirical run requires workspace identity")
+        try:
+            workspace_security = EmpiricalWorkspace.validate_for_inference(self.cwd, configured_root=self.workspace_root)
+        except EmpiricalWorkspaceError as exc:
+            raise EmpiricalContractError(f"empirical workspace security preflight failed before inference: {exc}") from exc
         destination, capture_ref = _safe_capture_path(self.capture_root, capture_name)
         started_at = _now()
         app_run = CodexAppServer(
@@ -340,6 +355,7 @@ class EmpiricalExecutor:
             "fixture_version": fixture_version,
             "model": asdict(self.model),
             "workspace_identity": workspace_identity,
+            "workspace_security": workspace_security,
             "auxiliary_calls": list(auxiliary_calls),
             "started_at": started_at,
             "ended_at": ended_at,
@@ -365,6 +381,7 @@ class EmpiricalExecutor:
             "turn_completed_elapsed_ms": app_run.turn_completed_elapsed_ms,
             "tool_calls": aggregate.tool_calls,
             "capture_ref": capture_ref,
+            "workspace_security": workspace_security,
         }
         assert_no_secrets(payload)
         capture_digest = _digest(payload)

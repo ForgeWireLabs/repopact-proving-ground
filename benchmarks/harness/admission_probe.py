@@ -4,12 +4,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import tempfile
 import time
 from dataclasses import asdict
 from pathlib import Path
 
 from .empirical import EMPIRICAL_EXECUTOR_VERSION, EmpiricalExecutor
+from .empirical_workspace import EmpiricalWorkspace
 from .execution import ModelIdentity
 from .workspace_io import WorkspaceIOError, read_bytes_after_quiescence
 
@@ -40,8 +40,9 @@ def run_probe(family: str, *, capture_root: str | Path) -> dict[str, object]:
     if family not in FAMILIES:
         raise ValueError(f"unsupported admission family: {family}")
     identity = FAMILIES[family]
-    with tempfile.TemporaryDirectory(prefix=f"wi022-admission-{family.replace('.', '-')}-") as temp:
-        workspace = Path(temp)
+    repo_root = Path(__file__).resolve().parents[2]
+    with EmpiricalWorkspace.allocate(repo_root=repo_root, prefix=f"wi022-admission-{family.replace('.', '-')}") as allocated:
+        workspace = allocated.path
         fixture = workspace / "admission-fixture.txt"
         fixture.write_text("WI022 disposable admission fixture\n", encoding="utf-8")
         fixture_digest = _digest(fixture)
@@ -58,6 +59,7 @@ def run_probe(family: str, *, capture_root: str | Path) -> dict[str, object]:
             capture_root=capture_root,
             pricing_id="chatgpt-subscription-unmetered-2026-09-14",
             output_schema=ADMISSION_SCHEMA,
+            workspace_root=allocated.configured_root,
         )
         turn = executor.run(
             prompt,
