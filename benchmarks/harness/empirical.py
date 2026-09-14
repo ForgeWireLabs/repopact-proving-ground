@@ -172,6 +172,7 @@ class EmpiricalTurn:
     runtime_identity: dict[str, Any]
     schema_identity: dict[str, Any]
     provenance: dict[str, Any]
+    turn_completed_elapsed_ms: float | None = None
 
     def validate(self) -> None:
         if self.provenance.get("classification") != "empirical":
@@ -186,6 +187,15 @@ class EmpiricalTurn:
             raise EmpiricalContractError("empirical turn requires schema identity")
         if not self.per_request or self.aggregate.requests != len(self.per_request):
             raise EmpiricalContractError("empirical turn requires reconciled request telemetry")
+        lifecycle = self.runtime_identity.get("process_lifecycle") or {}
+        if lifecycle.get("process_terminated") is not True:
+            raise EmpiricalContractError("empirical turn app-server process was not proven terminated")
+        if lifecycle.get("turn_completed_observed") is not True:
+            raise EmpiricalContractError("empirical turn did not observe turn/completed")
+        if lifecycle.get("final_usage_reconciled") is not True:
+            raise EmpiricalContractError("empirical turn did not reconcile final public usage")
+        if lifecycle.get("public_command_processes_terminated") is not True:
+            raise EmpiricalContractError("empirical turn left a public command process running or unqueryable")
 
     def to_envelope(
         self,
@@ -313,6 +323,7 @@ class EmpiricalExecutor:
             "command": PUBLIC_APP_SERVER_COMMAND,
             "initialize_result": app_run.initialize_result,
             "thread_result": app_run.thread_result,
+            "process_lifecycle": app_run.process_lifecycle or {},
         }
         schema_identity = {
             "schema_digest": _digest(self.output_schema),
@@ -351,6 +362,7 @@ class EmpiricalExecutor:
             "aggregate": asdict(aggregate),
             "telemetry": telemetry,
             "elapsed_ms": app_run.elapsed_ms,
+            "turn_completed_elapsed_ms": app_run.turn_completed_elapsed_ms,
             "tool_calls": aggregate.tool_calls,
             "capture_ref": capture_ref,
         }
@@ -380,6 +392,7 @@ class EmpiricalExecutor:
             runtime_identity=runtime_identity,
             schema_identity=schema_identity,
             provenance=provenance,
+            turn_completed_elapsed_ms=app_run.turn_completed_elapsed_ms,
         )
         turn.validate()
         return turn

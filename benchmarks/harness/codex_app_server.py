@@ -7,6 +7,8 @@ negotiates the public app-server surface and records only advancing
 from __future__ import annotations
 
 import json
+import ctypes
+import os
 import queue
 import subprocess
 import threading
@@ -50,6 +52,8 @@ class AppServerRun:
     # the constructor contract used by the historical v2 smoke tests/captures.
     initialize_result: dict[str, Any] | None = None
     thread_result: dict[str, Any] | None = None
+    turn_completed_elapsed_ms: float | None = None
+    process_lifecycle: dict[str, Any] | None = None
 
 
 def _json_line(value: dict[str, Any]) -> str:
@@ -73,6 +77,68 @@ def _extract_text(value: Any) -> list[str]:
                 result.extend(_extract_text(value[key]))
         return result
     return []
+
+
+def _public_command_process_ids(events: list[dict[str, Any]]) -> list[int]:
+    values: set[int] = set()
+
+    def visit(value: Any) -> None:
+        if isinstance(value, dict):
+            candidate = value.get("processId")
+            if isinstance(candidate, int) and candidate > 0:
+                values.add(candidate)
+            elif isinstance(candidate, str) and candidate.isdigit() and int(candidate) > 0:
+                values.add(int(candidate))
+            for nested in value.values():
+                visit(nested)
+        elif isinstance(value, list):
+            for nested in value:
+                visit(nested)
+
+    visit(events)
+    return sorted(values)
+
+
+def _query_owned_command_processes(process_ids: list[int]) -> list[dict[str, Any]]:
+    """Query only process IDs exposed by this turn's public command events."""
+    if os.name != "nt":
+        result: list[dict[str, Any]] = []
+        for pid in process_ids:
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                result.append({"pid": pid, "status": "exited"})
+            except PermissionError as exc:
+                result.append({"pid": pid, "status": "unknown", "errno": getattr(exc, "errno", None)})
+            else:
+                result.append({"pid": pid, "status": "running"})
+        return result
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    open_process = kernel32.OpenProcess
+    open_process.argtypes = [ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32]
+    open_process.restype = ctypes.c_void_p
+    get_exit_code = kernel32.GetExitCodeProcess
+    get_exit_code.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint32)]
+    get_exit_code.restype = ctypes.c_int
+    close_handle = kernel32.CloseHandle
+    close_handle.argtypes = [ctypes.c_void_p]
+    close_handle.restype = ctypes.c_int
+    result = []
+    for pid in process_ids:
+        handle = open_process(0x1000, 0, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not handle:
+            error = ctypes.get_last_error()
+            result.append({"pid": pid, "status": "exited" if error in {87, 1168} else "unknown", "winerror": error})
+            continue
+        exit_code = ctypes.c_uint32()
+        try:
+            if not get_exit_code(handle, ctypes.byref(exit_code)):
+                result.append({"pid": pid, "status": "unknown", "winerror": ctypes.get_last_error()})
+            else:
+                result.append({"pid": pid, "status": "running" if exit_code.value == 259 else "exited", "exit_code": exit_code.value})
+        finally:
+            close_handle(handle)
+    return result
 
 
 class CodexAppServer:
@@ -137,6 +203,13 @@ class CodexAppServer:
         server_requests: list[dict[str, Any]] = []
         ledger = UsageLedger()
         usage: list[tuple[AcceptedUsage, float, int]] = []
+        turn_completed_elapsed_ms: float | None = None
+        lifecycle: dict[str, Any] = {
+            "owned_process_pid": process.pid,
+            "owned_process_command": command,
+            "turn_completed_observed": False,
+            "public_command_process_ids": [],
+        }
         try:
             self._send(process, {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
                 "clientInfo": {"name": "repopact-pactbench", "version": "1"},
@@ -207,6 +280,8 @@ class CodexAppServer:
                                 final_output = text[-1]
                         else:
                             final_output = next(reversed(agent_messages.values()))
+                    turn_completed_elapsed_ms = (time.monotonic() - started) * 1000.0
+                    lifecycle["turn_completed_observed"] = True
                     break
             return AppServerRun(
                 events=tuple(events), usage=tuple(usage), final_output=final_output,
@@ -214,6 +289,8 @@ class CodexAppServer:
                 turn_id=str(turn_id), elapsed_ms=(time.monotonic() - started) * 1000.0,
                 initialize_result=initialize_response,
                 thread_result=thread_response,
+                turn_completed_elapsed_ms=turn_completed_elapsed_ms,
+                process_lifecycle=lifecycle,
             )
         except UsageLedgerError as exc:
             raise AppServerProtocolError(str(exc)) from exc
@@ -223,11 +300,34 @@ class CodexAppServer:
                     process.stdin.close()
             except OSError:
                 pass
+            termination_method = "already_exited"
             try:
-                process.terminate()
+                if process.poll() is None:
+                    process.terminate()
+                    termination_method = "terminate"
                 process.wait(timeout=5)
-            except (OSError, subprocess.TimeoutExpired):
-                process.kill()
+            except subprocess.TimeoutExpired:
+                termination_method = "kill_owned_process"
+                try:
+                    process.kill()
+                except ProcessLookupError:
+                    pass
+                process.wait(timeout=5)
+            except OSError:
+                if process.poll() is None:
+                    raise
+            lifecycle.update({
+                "public_command_process_ids": _public_command_process_ids(events),
+                "termination_method": termination_method,
+                "returncode": process.poll(),
+                "process_terminated": process.poll() is not None,
+                "accepted_usage_count": len(usage),
+                "final_usage_reconciled": bool(usage),
+                "turn_completed_elapsed_ms": turn_completed_elapsed_ms,
+            })
+            process_status = _query_owned_command_processes(lifecycle["public_command_process_ids"])
+            lifecycle["public_command_process_status"] = process_status
+            lifecycle["public_command_processes_terminated"] = all(item["status"] == "exited" for item in process_status)
 
     def _await_response(
         self,

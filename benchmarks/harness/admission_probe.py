@@ -5,11 +5,13 @@ import argparse
 import hashlib
 import json
 import tempfile
+import time
 from dataclasses import asdict
 from pathlib import Path
 
 from .empirical import EMPIRICAL_EXECUTOR_VERSION, EmpiricalExecutor
 from .execution import ModelIdentity
+from .workspace_io import WorkspaceIOError, read_bytes_after_quiescence
 
 
 ADMISSION_SCHEMA = {
@@ -71,7 +73,20 @@ def run_probe(family: str, *, capture_root: str | Path) -> dict[str, object]:
             auxiliary_calls=(),
         )
         result_file = workspace / "admission-result.txt"
-        tool_postcondition = result_file.is_file() and result_file.read_text(encoding="utf-8") == "probe tool operation complete"
+        turn_completed_monotonic = time.monotonic()
+        if turn.turn_completed_elapsed_ms is not None:
+            turn_completed_monotonic -= max(0.0, (turn.elapsed_ms - turn.turn_completed_elapsed_ms) / 1000.0)
+        try:
+            read_result = read_bytes_after_quiescence(
+                result_file,
+                workspace=workspace,
+                turn_completed_monotonic=turn_completed_monotonic,
+            )
+            tool_postcondition = read_result.content == b"probe tool operation complete"
+            read_evidence = read_result.evidence
+        except WorkspaceIOError as exc:
+            tool_postcondition = False
+            read_evidence = exc.evidence
         envelope = turn.to_envelope(
             study_id="WI022-AC3-admission",
             case_id=f"probe-{family}",
@@ -82,7 +97,7 @@ def run_probe(family: str, *, capture_root: str | Path) -> dict[str, object]:
             seed=0,
             scorer_version="wi022-ac3-admission.v1",
             success=tool_postcondition and turn.final_output.get("status") == "pass",
-            observations={"tool_postcondition": tool_postcondition, "model_report": turn.final_output},
+            observations={"tool_postcondition": tool_postcondition, "model_report": turn.final_output, "workspace_read": read_evidence},
         )
         return {
             "family": family,
@@ -91,6 +106,7 @@ def run_probe(family: str, *, capture_root: str | Path) -> dict[str, object]:
             "executor_version": EMPIRICAL_EXECUTOR_VERSION,
             "result": "PASS" if tool_postcondition and turn.final_output.get("status") == "pass" else "FAIL",
             "tool_postcondition": tool_postcondition,
+            "workspace_read": read_evidence,
             "structured_output": turn.final_output,
             "thread_id": turn.thread_id,
             "turn_id": turn.turn_id,

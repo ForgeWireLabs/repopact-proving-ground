@@ -84,6 +84,19 @@ class SharedRuntimeTests(unittest.TestCase):
         with self.assertRaises(EmpiricalContractError):
             EmpiricalTurn(**kwargs).to_envelope(study_id="S", case_id="c", condition="x", fixture="f", fixture_version="v", repetition=0, seed=0, scorer_version="s", success=True)
 
+    def test_empirical_turn_requires_owned_runtime_lifecycle_proof(self):
+        usage = TokenUsage(input_tokens=10, output_tokens=2, context_tokens=8, task_tokens=2, requests=1, cache_adjusted_input_tokens=10, provider="openai", model="m", pricing_id="p")
+        kwargs = dict(
+            model=ModelIdentity("gpt-5.6", "openai", "gpt-5.6-luna"), provider="openai", thread_id="t", turn_id="u",
+            raw_events=(), server_requests=(), final_output={}, final_output_text="{}", per_request=(usage,), aggregate=usage,
+            elapsed_ms=1.0, tool_calls=0, telemetry={}, capture_ref="capture.json", capture_digest="a" * 64,
+            runtime_identity={"command": "codex app-server --stdio", "initialize_result": {"result": {}}, "process_lifecycle": {"turn_completed_observed": True, "final_usage_reconciled": True, "process_terminated": False}},
+            schema_identity={"schema_digest": "b" * 64},
+            provenance={"classification": "empirical", "executor_version": EMPIRICAL_EXECUTOR_VERSION},
+        )
+        with self.assertRaises(EmpiricalContractError):
+            EmpiricalTurn(**kwargs).validate()
+
 
 class OperationalizationTests(unittest.TestCase):
     def test_all_runnable_conditions_have_stable_fingerprints_and_no_auxiliary_calls(self):

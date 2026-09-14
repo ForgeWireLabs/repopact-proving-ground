@@ -16,6 +16,7 @@ from .driver import (
     isolated_worker_worktrees,
     score_coordination,
 )
+from ..harness.workspace_io import read_bytes_after_quiescence
 
 
 S3_WORKER_SCHEMA = {
@@ -50,7 +51,9 @@ def _snapshot(root: Path) -> dict[str, str]:
     for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
         if not path.is_file() or ".git" in path.relative_to(root).parts:
             continue
-        result[path.relative_to(root).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+        result[path.relative_to(root).as_posix()] = hashlib.sha256(
+            read_bytes_after_quiescence(path, workspace=root).content
+        ).hexdigest()
     return result
 
 
