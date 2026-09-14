@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass
+import hashlib
 from statistics import mean
 from typing import Any
 
@@ -15,6 +16,15 @@ except ImportError:  # pragma: no cover
 
 
 SCORER_VERSION = "s5-drift-adapter.v1"
+EXECUTION_METHOD_VERSION = "2026-09-14.s5-model-independent.1"
+MODEL_INDEPENDENT = True
+REGISTERED_CONDITIONS = ("C2", "C2+C3", "C7")
+
+
+def condition_implementation_fingerprint(condition: str) -> str:
+    if condition not in REGISTERED_CONDITIONS:
+        raise ValueError(f"S5 condition is not registered: {condition}")
+    return hashlib.sha256(f"{EXECUTION_METHOD_VERSION}|{condition}|deterministic-validator".encode()).hexdigest()
 
 
 @dataclass(frozen=True)
@@ -27,6 +37,53 @@ class DriftObservation:
     false_drift: bool
     reconciliation_cost: int
     blind_spot: bool = False
+
+
+@dataclass(frozen=True)
+class S5ExecutionCell:
+    """One deterministic drift observation; it has no model arm."""
+
+    mutation_id: str
+    condition: str
+    repetition: int
+    seed: int
+    model: None = None
+    expected_task_turns: int = 0
+    auxiliary_call_class: str = "deterministic-validator"
+
+
+def build_execution_plan(
+    mutation_ids: Iterable[str], *, repetitions: int = 3,
+) -> tuple[S5ExecutionCell, ...]:
+    """Build the registered S5 plan without pseudo-replicating model labels."""
+    if repetitions < 1:
+        raise ValueError("S5 repetitions must be positive")
+    cells: list[S5ExecutionCell] = []
+    for mutation_id in sorted(set(mutation_ids)):
+        if not mutation_id:
+            raise ValueError("S5 mutation ids must be non-empty")
+        for condition in REGISTERED_CONDITIONS:
+            for repetition in range(repetitions):
+                seed = int.from_bytes(
+                    hashlib.sha256(f"S5|{EXECUTION_METHOD_VERSION}|{mutation_id}|{condition}|{repetition}".encode()).digest()[:8],
+                    "big",
+                )
+                cells.append(S5ExecutionCell(mutation_id, condition, repetition, seed))
+    validate_execution_plan(cells)
+    return tuple(cells)
+
+
+def validate_execution_plan(cells: Iterable[S5ExecutionCell]) -> None:
+    seen: set[tuple[str, str, int]] = set()
+    for cell in cells:
+        if not isinstance(cell, S5ExecutionCell):
+            raise TypeError("S5 plan entries must be S5ExecutionCell")
+        if cell.model is not None or cell.expected_task_turns != 0:
+            raise ValueError("S5 deterministic cells cannot carry a model or task turn")
+        key = (cell.mutation_id, cell.condition, cell.repetition)
+        if key in seen:
+            raise ValueError(f"duplicate S5 deterministic cell: {key}")
+        seen.add(key)
 
 
 def adapt_result(raw: dict[str, Any], *, condition: str = "repopact", fixture_version: str = "drift-mutations.v1") -> DriftObservation:

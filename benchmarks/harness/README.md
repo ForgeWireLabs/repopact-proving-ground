@@ -64,6 +64,9 @@ repository postconditions, so no diff alone is treated as a block or escalation.
 | `run.schema.json` | Machine-readable envelope shape/version |
 | `runners.py` | Versioned `MockRunner`, `RealRunner` (gated), `get_runner` |
 | `codex_app_server.py` | Public app-server stdio client and advancing token ledger feed |
+| `empirical.py` | Shared strict-schema empirical turn, telemetry, capture, and provenance boundary |
+| `ac3_execution_manifest.py` | Generates the pre-inference AC-3 manifest; it never starts a cell |
+| `admission_probe.py` | One-shot disposable family admission probe, outside the registered matrix |
 | `codex_real_runner_v2.py` | Corrected three-case smoke adapter with preflight and captures |
 | `codex_usage.py` | Pinned tokenizer and strict v2 usage accounting |
 | `registry.py` | Deterministic pre-registration ordering and file digests |
@@ -80,3 +83,10 @@ resistance. S2's external beds are pinned by immutable revision and selector man
 materialization is explicit and does not vendor third-party task material. These drivers
 are executable plumbing, not agent-behaviour findings. Live comparative execution remains
 operator-gated on a provisioned runner and model credentials.
+
+The AC-3 empirical adapters are intentionally narrow: `s2/empirical.py` requires a
+verified pinned materialization plus a study-built functional/evaluation bed;
+`s3/empirical.py` creates two concurrent isolated worker turns; `s4/empirical.py`
+uses the frozen local renderers in `s4/operationalization.py`; and `s6a`/`s6b`
+require objective filesystem/postcondition evaluators. The existing deterministic
+drivers and S5 fixture self-tests remain illustrative/non-empirical.

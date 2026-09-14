@@ -23,7 +23,8 @@ try:
     from .capture import assert_no_secrets
     from .codex_app_server import ACTION_SIGNAL_SCHEMA, AppServerProtocolError, CodexAppServer
     from .codex_usage import UsageLedgerError, task_token_count
-    from .execution import aggregate_telemetry
+    from .empirical import telemetry_from_app_run
+    from .execution import ModelIdentity, aggregate_telemetry
     from .grader_v2 import parse_action_signal
     from .model import TokenUsage
     from ..pactbench.materialize import (
@@ -42,7 +43,8 @@ except ImportError:  # pragma: no cover - direct script entry point
     from benchmarks.harness.capture import assert_no_secrets  # type: ignore
     from benchmarks.harness.codex_app_server import ACTION_SIGNAL_SCHEMA, AppServerProtocolError, CodexAppServer  # type: ignore
     from benchmarks.harness.codex_usage import UsageLedgerError, task_token_count  # type: ignore
-    from benchmarks.harness.execution import aggregate_telemetry  # type: ignore
+    from benchmarks.harness.empirical import telemetry_from_app_run  # type: ignore
+    from benchmarks.harness.execution import ModelIdentity, aggregate_telemetry  # type: ignore
     from benchmarks.harness.grader_v2 import parse_action_signal  # type: ignore
     from benchmarks.harness.model import TokenUsage  # type: ignore
     from benchmarks.pactbench.materialize import (  # type: ignore
@@ -227,65 +229,24 @@ def _provider_usage(app_run: Any) -> list[dict[str, Any]]:
 
 
 def _telemetry(app_run: Any, task_payload: str, *, events: tuple[dict[str, Any], ...]) -> tuple[list[TokenUsage], dict[str, Any]]:
-    if not app_run.usage:
-        raise UsageLedgerError("public app-server run contained no accepted request-level usage")
-    task_tokens = task_token_count(task_payload)
-    requests: list[TokenUsage] = []
-    previous_elapsed = 0.0
-    for index, (accepted, elapsed_ms, event_index) in enumerate(app_run.usage):
-        raw = accepted.last
-        request_task_tokens = task_tokens if index == 0 else 0
-        if request_task_tokens > raw.input_tokens:
-            raise UsageLedgerError("task token attribution exceeds provider input")
-        next_event_index = app_run.usage[index + 1][2] if index + 1 < len(app_run.usage) else len(events)
-        interval_elapsed = max(0.0, elapsed_ms - previous_elapsed)
-        previous_elapsed = elapsed_ms
-        requests.append(TokenUsage(
-            input_tokens=raw.input_tokens,
-            output_tokens=raw.output_tokens,
-            context_tokens=raw.input_tokens - request_task_tokens,
-            task_tokens=request_task_tokens,
-            requests=1,
-            usd=0.0,
-            cached_tokens=raw.cached_input_tokens,
-            cached_input_tokens=raw.cached_input_tokens,
-            cache_write_input_tokens=raw.cache_write_input_tokens,
-            reasoning_output_tokens=raw.reasoning_output_tokens,
-            cache_adjusted_input_tokens=raw.input_tokens - raw.cached_input_tokens,
-            pricing_id=PRICING_ID,
-            provider=MODEL_PROVIDER,
-            model=MODEL_VERSION,
-            tool_calls=_tool_call_count(events, event_index, next_event_index),
-            elapsed_ms=round(interval_elapsed, 3),
-        ))
-    aggregate = aggregate_telemetry(requests)
-    return requests, {
-        "source": "public Codex app-server thread/tokenUsage/updated",
-        "accepted_request_count": len(requests),
-        "notifications": _provider_usage(app_run),
-        "model_context_windows": [
-            item["model_context_window"] for item in _provider_usage(app_run)
-            if "model_context_window" in item
-        ],
-        "aggregate": {
-            "input_tokens": aggregate.input_tokens,
-            "cached_input_tokens": aggregate.cached_input_tokens,
-            "cache_write_input_tokens": aggregate.cache_write_input_tokens,
-            "output_tokens": aggregate.output_tokens,
-            "reasoning_output_tokens": aggregate.reasoning_output_tokens,
-            "context_tokens": aggregate.context_tokens,
-            "task_tokens": aggregate.task_tokens,
-            "cache_adjusted_input_tokens": aggregate.cache_adjusted_input_tokens,
-            "requests": aggregate.requests,
-            "usd": aggregate.usd,
-            "pricing_id": aggregate.pricing_id,
-            "provider": aggregate.provider,
-            "model": aggregate.model,
-            "tool_calls": aggregate.tool_calls,
-            "elapsed_ms": aggregate.elapsed_ms,
-        },
-        "pricing_policy": "ChatGPT-authenticated Codex subscription has no per-request API charge; USD 0 is policy, not an unavailable price.",
-    }
+    # Keep this historical symbol and call shape while sharing the exact v2
+    # request attribution with the new empirical executor.
+    requests, telemetry = telemetry_from_app_run(
+        app_run,
+        task_payload,
+        identity=ModelIdentity(MODEL_FAMILY, MODEL_PROVIDER, MODEL_VERSION),
+        pricing_id=PRICING_ID,
+    )
+    # Historical captures call this field ``notifications`` and use this pricing
+    # wording; retain those details at the compatibility boundary.
+    telemetry["notifications"] = telemetry.pop("provider_usage")
+    telemetry["model_context_windows"] = [
+        item["model_context_window"] for item in telemetry["notifications"]
+        if "model_context_window" in item
+    ]
+    telemetry["pricing_policy"] = "ChatGPT-authenticated Codex subscription has no per-request API charge; USD 0 is policy, not an unavailable price."
+    telemetry.pop("usd_policy", None)
+    return requests, telemetry
 
 
 def _postconditions(case_id: str, work: Path, seed_commit: str, seed_snapshot: dict[str, str], events: tuple[dict[str, Any], ...], server_requests: tuple[dict[str, Any], ...]) -> dict[str, Any]:

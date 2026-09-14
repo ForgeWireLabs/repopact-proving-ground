@@ -31,3 +31,8 @@ python benchmarks/s2/materialize.py --bed swe-evo --out .s2-materialized --verif
 
 The output directory is intentionally ignored by Git. No model, inference
 runner, or third-party benchmark payload is part of this repository.
+
+`empirical.py` is a separate adapter. It accepts only a verified pinned
+materialization and a study-built functional/evaluation bed, creates matched
+baseline/RepoPact seeds, and grades objective postconditions. It does not convert
+the recovery metric `tokens_to_completion` into telemetry.

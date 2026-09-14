@@ -46,6 +46,10 @@ class AppServerRun:
     thread_id: str
     turn_id: str
     elapsed_ms: float
+    # Public responses are retained for empirical provenance.  Defaults preserve
+    # the constructor contract used by the historical v2 smoke tests/captures.
+    initialize_result: dict[str, Any] | None = None
+    thread_result: dict[str, Any] | None = None
 
 
 def _json_line(value: dict[str, Any]) -> str:
@@ -74,11 +78,22 @@ def _extract_text(value: Any) -> list[str]:
 class CodexAppServer:
     """One fresh app-server process and one fresh thread/turn per benchmark case."""
 
-    def __init__(self, *, model: str, provider: str, cwd: str, timeout_seconds: int = 1800) -> None:
+    def __init__(
+        self,
+        *,
+        model: str,
+        provider: str,
+        cwd: str,
+        timeout_seconds: int = 1800,
+        output_schema: dict[str, Any] | None = None,
+    ) -> None:
         self.model = model
         self.provider = provider
         self.cwd = cwd
         self.timeout_seconds = timeout_seconds
+        # The default is intentionally the historical AC-5 schema.  New studies
+        # opt into a study-specific strict schema without changing that contract.
+        self.output_schema = output_schema or ACTION_SIGNAL_SCHEMA
 
     def _send(self, process: subprocess.Popen[str], message: dict[str, Any]) -> None:
         if process.stdin is None:
@@ -113,7 +128,7 @@ class CodexAppServer:
             raise AppServerProtocolError("app-server message must be an object")
         return value
 
-    def run(self, prompt: str) -> AppServerRun:
+    def run(self, prompt: str, *, output_schema: dict[str, Any] | None = None) -> AppServerRun:
         command = ["codex", "app-server", "--stdio"]
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         started = time.monotonic()
@@ -127,7 +142,7 @@ class CodexAppServer:
                 "clientInfo": {"name": "repopact-pactbench", "version": "1"},
                 "capabilities": {"experimentalApi": True},
             }})
-            self._await_response(process, 1, events, server_requests, ledger, usage, deadline, started)
+            initialize_response = self._await_response(process, 1, events, server_requests, ledger, usage, deadline, started)
             self._send(process, {"jsonrpc": "2.0", "method": "initialized", "params": {}})
             self._send(process, {"jsonrpc": "2.0", "id": 2, "method": "thread/start", "params": {
                 "model": self.model,
@@ -150,7 +165,7 @@ class CodexAppServer:
                 "cwd": self.cwd,
                 "approvalPolicy": "never",
                 "sandboxPolicy": {"type": "workspaceWrite"},
-                "outputSchema": ACTION_SIGNAL_SCHEMA,
+                "outputSchema": output_schema or self.output_schema,
             }})
             turn_id = ""
             final_output = ""
@@ -197,6 +212,8 @@ class CodexAppServer:
                 events=tuple(events), usage=tuple(usage), final_output=final_output,
                 server_requests=tuple(server_requests), thread_id=thread_id,
                 turn_id=str(turn_id), elapsed_ms=(time.monotonic() - started) * 1000.0,
+                initialize_result=initialize_response,
+                thread_result=thread_response,
             )
         except UsageLedgerError as exc:
             raise AppServerProtocolError(str(exc)) from exc
