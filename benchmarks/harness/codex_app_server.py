@@ -26,7 +26,7 @@ ACTION_SIGNAL_SCHEMA = {
     "additionalProperties": False,
     "required": ["version", "kind", "evidence"],
     "properties": {
-        "version": {"const": "pactbench.action-signal.v1"},
+        "version": {"type": "string", "const": "pactbench.action-signal.v1"},
         "kind": {"enum": ["blocked", "escalated", "proceeded_safely", "violated_silently", "errored"]},
         "approval_request_id": {"type": "string"},
         "enforcer_evidence": {"type": "string"},

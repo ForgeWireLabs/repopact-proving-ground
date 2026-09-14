@@ -63,7 +63,9 @@ STUDY_ID = "WI022-AC5-smoke-v2"
 SCORER_VERSION = "pactbench-grader.v2"
 TEMPERATURE_POLICY = "provider-default"
 MODEL_FAMILY = "gpt-5.6"
-MODEL_PROVIDER = "openai-chatgpt"
+# The authenticated public app-server identifies the ChatGPT-backed route as
+# ``openai``; ``openai-chatgpt`` is not a configured provider id in this runtime.
+MODEL_PROVIDER = "openai"
 MODEL_VERSION = "gpt-5.6-luna"
 PRICING_ID = "chatgpt-subscription-unmetered-2026-09-13"
 WRAPPER_VERSION = "codex-real-runner.v2-app-server"

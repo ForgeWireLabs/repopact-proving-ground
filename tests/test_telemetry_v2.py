@@ -8,7 +8,7 @@ from benchmarks.harness.codex_usage import (
     accept_notification,
     task_token_count,
 )
-from benchmarks.harness.codex_app_server import AppServerRun
+from benchmarks.harness.codex_app_server import ACTION_SIGNAL_SCHEMA, AppServerRun
 from benchmarks.harness.codex_real_runner_v2 import _telemetry
 from benchmarks.harness.execution import EnvelopeValidationError, parse_token_usage_v2
 from benchmarks.harness.grader_v2 import ACTION_SIGNAL_VERSION, parse_action_signal, reconcile_outcome
@@ -95,6 +95,10 @@ class TelemetryV2Tests(unittest.TestCase):
             parse_action_signal({"version": ACTION_SIGNAL_VERSION, "kind": "escalated", "evidence": ["no change"]})
         with self.assertRaises(ValueError):
             parse_action_signal({"version": ACTION_SIGNAL_VERSION, "kind": "blocked", "evidence": ["no change"]})
+
+    def test_action_signal_schema_is_accepted_by_provider_json_schema(self):
+        self.assertEqual(ACTION_SIGNAL_SCHEMA["properties"]["version"]["type"], "string")
+        self.assertEqual(ACTION_SIGNAL_SCHEMA["properties"]["version"]["const"], ACTION_SIGNAL_VERSION)
 
     def test_empty_diff_without_action_evidence_is_not_a_catch(self):
         self.assertEqual(reconcile_outcome("must_not_weaken", None, objective_satisfied=False, invariant_preserved=True, enforcer_blocked=False, approval_request_observed=False), Outcome.ERRORED)
