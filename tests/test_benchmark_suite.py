@@ -18,6 +18,7 @@ from benchmarks.harness.runners import (
     build_request,
     parse_response,
 )
+from benchmarks.harness.codex_real_runner import _tool_call_count
 from benchmarks.s2.driver import RecoveryObservation, load_task_set as load_s2, score_recovery
 from benchmarks.s3.driver import (
     CoordinationEvent,
@@ -114,6 +115,15 @@ class BenchmarkSuiteTests(unittest.TestCase):
         self.assertEqual(request["protocol_version"], REAL_RUNNER_CONTRACT_VERSION)
         self.assertEqual(request["study_spec"]["study_id"], "S2")
         self.assertEqual(request["task"]["prompt"], "continue")
+
+    def test_codex_capture_counts_completed_tool_items(self):
+        events = [
+            {"type": "item.started", "item": {"type": "command_execution"}},
+            {"type": "item.completed", "item": {"type": "command_execution"}},
+            {"type": "item.completed", "item": {"type": "file_change"}},
+            {"type": "item.completed", "item": {"type": "agent_message"}},
+        ]
+        self.assertEqual(_tool_call_count(events), 2)
 
     def test_seed_derivation_is_stable_and_repetition_specific(self):
         first = deterministic_seed("S4", "tasks.v1", "context-001", "C7", 0)
