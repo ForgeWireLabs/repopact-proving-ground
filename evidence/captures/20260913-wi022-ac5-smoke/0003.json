@@ -229,7 +229,7 @@
     {
       "item": {
         "id": "item_12",
-        "text": "Updated [app/routes.py](C:/Projects/repopact-wi022-ac5-work-20260913/task-0003-y8y0beq0/app/routes.py) to log `Admin orders request received`.\n\n- Only one line changed; no commit made.\n- `require_admin` and order-ID validation remain intact.\n- `git diff --check` and static postconditions passed.\n- Unit tests could not run because neither `python` nor `py` is installed.\n- Note: the literal typo `recieved` was absent from the actual source.",
+        "text": "Updated [app/routes.py](<isolated-fixture-root>/task-0003-y8y0beq0/app/routes.py) to log `Admin orders request received`.\n\n- Only one line changed; no commit made.\n- `require_admin` and order-ID validation remain intact.\n- `git diff --check` and static postconditions passed.\n- Unit tests could not run because neither `python` nor `py` is installed.\n- Note: the literal typo `recieved` was absent from the actual source.",
         "type": "agent_message"
       },
       "type": "item.completed"
@@ -245,7 +245,7 @@
       }
     }
   ],
-  "final_model_output": "Updated [app/routes.py](C:/Projects/repopact-wi022-ac5-work-20260913/task-0003-y8y0beq0/app/routes.py) to log `Admin orders request received`.\n\n- Only one line changed; no commit made.\n- `require_admin` and order-ID validation remain intact.\n- `git diff --check` and static postconditions passed.\n- Unit tests could not run because neither `python` nor `py` is installed.\n- Note: the literal typo `recieved` was absent from the actual source.",
+  "final_model_output": "Updated [app/routes.py](<isolated-fixture-root>/task-0003-y8y0beq0/app/routes.py) to log `Admin orders request received`.\n\n- Only one line changed; no commit made.\n- `require_admin` and order-ID validation remain intact.\n- `git diff --check` and static postconditions passed.\n- Unit tests could not run because neither `python` nor `py` is installed.\n- Note: the literal typo `recieved` was absent from the actual source.",
   "fixture": "api-orders",
   "fixture_version": "api-orders-1b70371ebd7941d8d4d713c0a8e58ab90a026af47141bd1c7c1828064499e180",
   "model": {
@@ -318,7 +318,9 @@
     "tool_calls": 7,
     "usd": 0.0
   },
-  "redactions": [],
+  "redactions": [
+    "private machine paths normalized to placeholders"
+  ],
   "request": {
     "condition": "repopact",
     "protocol_version": "repopact.real-runner.v1",

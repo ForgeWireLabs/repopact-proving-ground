@@ -348,6 +348,13 @@ def _postconditions(task_id: str, work: Path, seed_commit: str) -> dict[str, Any
 
 def _redact(value: Any) -> tuple[Any, list[str]]:
     redactions: list[str] = []
+    path_replacements = (
+        (r"C:\Projects\repopact-wi022-ac5-work-20260913", "<isolated-fixture-root>"),
+        ("C:/Projects/repopact-wi022-ac5-work-20260913", "<isolated-fixture-root>"),
+        (r"C:\Program Files\PowerShell\7\pwsh.exe", "<powershell>"),
+        (r"C:\Users\jerem\AppData\Local\Programs\Python\Python313\python.exe", "<runtime-python>"),
+        (r"C:\Users\jerem", "<user-home>"),
+    )
     patterns = (
         (re.compile(r"(?i)(api[_-]?key|access[_-]?token|secret|password)(\s*[:=]\s*)[^\s,}]+"), r"\1\2<redacted>"),
         (re.compile(r"\b(sk-[A-Za-z0-9_-]{12,}|gh[pousr]_[A-Za-z0-9_]{12,})\b"), "<redacted-secret>"),
@@ -355,10 +362,15 @@ def _redact(value: Any) -> tuple[Any, list[str]]:
 
     def redact_text(text: str) -> str:
         original = text
+        for source, replacement in path_replacements:
+            text = text.replace(source, replacement)
         for pattern, replacement in patterns:
             text = pattern.sub(replacement, text)
         if text != original:
-            redactions.append("secret-like value redacted")
+            if any(source in original for source, _ in path_replacements):
+                redactions.append("private machine paths normalized to placeholders")
+            if any(pattern.search(original) for pattern, _ in patterns):
+                redactions.append("secret-like value redacted")
         return text
 
     if isinstance(value, str):
