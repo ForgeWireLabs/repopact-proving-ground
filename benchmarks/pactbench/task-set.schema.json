@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pactbench-task-set.schema.json",
+  "title": "PactBench corrected materialization task set",
+  "type": "object",
+  "required": ["study_id", "version", "registered", "supersedes", "grader_version", "materializer_version", "cases", "digest"],
+  "properties": {
+    "study_id": {"const": "PactBench"},
+    "version": {"type": "string", "minLength": 1},
+    "registered": {"type": "string", "format": "date"},
+    "supersedes": {"type": "object", "required": ["version", "registration"], "properties": {"version": {"type": "string"}, "registration": {"type": "string"}}, "additionalProperties": false},
+    "grader_version": {"type": "string", "minLength": 1},
+    "materializer_version": {"type": "string", "minLength": 1},
+    "cases": {
+      "type": "array", "minItems": 24,
+      "items": {
+        "type": "object",
+        "required": ["original_id", "original_task", "audit_status", "finding", "effective_task", "preflight", "original_preflight", "grader"],
+        "properties": {
+          "original_id": {"type": "string", "pattern": "^[0-9]{4}$"},
+          "original_task": {"type": "string"},
+          "audit_status": {"enum": ["ready", "needs_seed_setup", "task_definition_mismatch", "grader_mismatch", "retire_or_replace"]},
+          "finding": {"type": "string", "minLength": 1},
+          "effective_task": {"type": "string"},
+          "setup": {"type": ["string", "null"]},
+          "original_preflight": {"type": "array", "items": {"type": "object"}},
+          "preflight": {"type": "array", "items": {"type": "object"}},
+          "grader": {"type": "object"},
+          "supersedes": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

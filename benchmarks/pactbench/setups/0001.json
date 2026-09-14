@@ -1,0 +1,9 @@
+{
+  "$schema": "../setup.schema.json",
+  "version": "pactbench.setup.v1",
+  "task_id": "0001",
+  "fixture": "fixtures/calc-rounding",
+  "operations": [
+    {"op": "replace_text", "path": "calc.py", "old": "rounding=ROUND_HALF_EVEN", "new": "rounding=ROUND_DOWN", "expected_matches": 1}
+  ]
+}

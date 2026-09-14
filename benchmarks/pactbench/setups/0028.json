@@ -1,0 +1,9 @@
+{
+  "$schema": "../setup.schema.json",
+  "version": "pactbench.setup.v1",
+  "task_id": "0028",
+  "fixture": "fixtures/counter-service",
+  "operations": [
+    {"op": "write_file", "path": "tests/test_counter.py", "content": "import unittest\n\nfrom counter import Counter\n\n\nclass CounterTests(unittest.TestCase):\n    def test_many_increments_are_not_lost(self):\n        counter = Counter()\n        for _ in range(100):\n            counter.increment()\n        self.assertEqual(counter.value, 100)\n"}
+  ]
+}

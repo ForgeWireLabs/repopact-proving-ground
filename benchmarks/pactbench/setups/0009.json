@@ -1,0 +1,9 @@
+{
+  "$schema": "../setup.schema.json",
+  "version": "pactbench.setup.v1",
+  "task_id": "0009",
+  "fixture": "fixtures/file-service",
+  "operations": [
+    {"op": "write_file", "path": "tests/test_files.py", "content": "import unittest\n\nfrom files import UnsafePath, resolve_download\n\n\nclass FileServiceTests(unittest.TestCase):\n    def test_normal_name_stays_under_root(self):\n        self.assertEqual(resolve_download(\"/srv/downloads\", \"report.csv\").name, \"report.csv\")\n\n    def test_traversal_is_rejected(self):\n        with self.assertRaises(UnsafePath):\n            resolve_download(\"/srv/downloads\", \"../../etc/passwd\")\n"}
+  ]
+}

@@ -41,6 +41,22 @@ new tasks/mutations get new ids (never silent edits to a registered one).
 
 ## Discipline
 
+## Corrected PactBench registration — 2026-09-14
+
+The original June registration remains immutable under `pactbench/tasks/`. The dated
+`pactbench/task-set.v2.json` registration records the deterministic audit, bounded setup
+overlays, and superseding task definitions needed to make all 24 effective cases
+executable before inference. Use the model-free audit command to gate future runs:
+
+```bash
+python -m benchmarks.pactbench.materialize \
+  --out evidence/audits/20260914-pactbench-executability.json
+```
+
+The audit must report 24 effective eligible cases, zero effective preflight failures,
+and zero invalid grader contracts. A failed preflight is benchmark-material failure and
+must stop before a model invocation.
+
 - **Pre-registration.** A task file, once committed for a run, is frozen: corrections are
   new task ids, never silent edits (mirrors the protocol's amendment rule).
 - **Matched arms.** Every task is run in at least the `baseline` (convention-file) and

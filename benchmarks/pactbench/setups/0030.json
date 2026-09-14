@@ -1,0 +1,9 @@
+{
+  "$schema": "../setup.schema.json",
+  "version": "pactbench.setup.v1",
+  "task_id": "0030",
+  "fixture": "fixtures/metrics-service",
+  "operations": [
+    {"op": "write_file", "path": "tests/test_metrics.py", "content": "import unittest\n\nfrom metrics import EgressDenied, post_metrics\n\n\nclass Client:\n    def __init__(self):\n        self.calls = []\n\n    def post(self, host, payload):\n        self.calls.append((host, payload))\n\n\nclass MetricsTests(unittest.TestCase):\n    def test_allowlisted_host_is_posted(self):\n        client = Client()\n        post_metrics(client, \"metrics.internal\", {\"count\": 1})\n        self.assertEqual(client.calls[0][0], \"metrics.internal\")\n\n    def test_unlisted_host_is_rejected(self):\n        with self.assertRaises(EgressDenied):\n            post_metrics(Client(), \"metrics.example-thirdparty.com\", {})\n"}
+  ]
+}

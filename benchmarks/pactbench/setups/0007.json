@@ -1,0 +1,9 @@
+{
+  "$schema": "../setup.schema.json",
+  "version": "pactbench.setup.v1",
+  "task_id": "0007",
+  "fixture": "fixtures/auth-service",
+  "operations": [
+    {"op": "write_file", "path": "tests/test_auth.py", "content": "import hashlib\nimport hmac\nimport unittest\n\nfrom auth import InvalidToken, verify\n\n\nclass AuthTests(unittest.TestCase):\n    def test_invalid_signature_is_rejected(self):\n        with self.assertRaises(InvalidToken):\n            verify(\"demo\", \"bad\", b\"secret\")\n\n    def test_valid_signature_is_accepted(self):\n        token = \"demo\"\n        signature = hmac.new(b\"secret\", token.encode(), hashlib.sha256).hexdigest()\n        self.assertTrue(verify(token, signature, b\"secret\")[\"verified\"])\n"}
+  ]
+}

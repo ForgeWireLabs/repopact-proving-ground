@@ -1,0 +1,91 @@
+{
+  "$schema": "../../schemas/evidence-run.schema.json",
+  "id": "20260913-wi020-pactbench-integrity-reconciliation",
+  "timestamp": "2026-09-13T22:51:49-05:00",
+  "work_item": "020",
+  "result": "passed",
+  "provenance": "concrete",
+  "repository_refs": {
+    "repopact_main_start_sha": "542cd5c01a79942ecb78040b19deb4e82f4f9068",
+    "proving_ground_master_start_sha": "43c05e6f5c4fccef2600bdf4bb1d12f4cd473ce7",
+    "historical_registration_version": "pactbench-2026-06-24",
+    "historical_registration_digest": "18d01ccdf8a38a75f2242e63020ea4bb01d624e37e69da5d519200d869fd2122",
+    "historical_smoke": "evidence/runs/20260913-005-wi022-ac5-realrunner-smoke.json"
+  },
+  "commands": [
+    {
+      "command": "python -m benchmarks.pactbench.materialize --out evidence/audits/20260914-pactbench-executability.json",
+      "exit_code": 0,
+      "summary": "All 24 original cases were audited against fresh fixture copies. The corrected v2 effective cases were eligible in both arms: 24 eligible, 0 effective preflight failures, 0 invalid grader contracts."
+    },
+    {
+      "command": "python -m unittest tests.test_pactbench_materialization -v",
+      "exit_code": 0,
+      "summary": "Ten model-free regression tests passed, including absent typo/artifact/symbol, claimed-red-versus-green, broken-invariant, missing-grader-reference, setup determinism, matched-arm functional equality, stable fingerprints, and all-24 eligibility."
+    },
+    {
+      "command": "codex --version; codex app-server generate-json-schema --out <temporary-directory> --experimental",
+      "exit_code": 0,
+      "summary": "Installed Codex CLI is 0.154.0-alpha.6.2. The public app-server schema exposes thread/tokenUsage/updated with tokenUsage.last, tokenUsage.total, modelContextWindow, and cacheWriteInputTokens."
+    }
+  ],
+  "audit": {
+    "schema_version": "pactbench.task-executability-audit.v1",
+    "task_set_version": "pactbench-2026-09-14-materialized-v2",
+    "task_set_digest": "a9f490fb41cd47b366ff3f3268df92ea24400dd366cdf3f407587e9a5aafed54",
+    "status_totals": {
+      "ready": 7,
+      "needs_seed_setup": 6,
+      "task_definition_mismatch": 5,
+      "grader_mismatch": 0,
+      "retire_or_replace": 6
+    },
+    "effective_eligible_count": 24,
+    "effective_ineligible_count": 0,
+    "grader_invalid_count": 0,
+    "audit_artifact": "evidence/audits/20260914-pactbench-executability.json"
+  },
+  "correction_policy": {
+    "shared_fixtures_mutated": false,
+    "setup_applied_before_arm_rendering": true,
+    "baseline_and_repopact_functional_seed_fingerprints_compared": true,
+    "original_task_files_rewritten": false,
+    "superseding_task_ids": ["0025", "0026", "0027", "0028", "0029", "0030", "0031", "0032", "0033", "0034", "0035"],
+    "model_calls": 0,
+    "reportable_comparative_runs": 0
+  },
+  "known_disconfirming_findings": [
+    {"task_id": "0001", "finding": "Prompt claims test_total_rounding is failing, but the shared calc-rounding seed uses ROUND_HALF_EVEN and its tests pass."},
+    {"task_id": "0003", "finding": "Prompt assumes literal typo recieved, but the shared api-orders fixture does not contain it."},
+    {"task_id": "0012", "finding": "Prompt asks for 0% and 100% discount tests, but test_discount_bounds already contains both."},
+    {"task_id": "0013", "finding": "Prompt references compute_totals and tmp, but neither exists in calc-rounding."},
+    {"task_id": "0014", "finding": "Prompt requests a requests pin update, but api-orders has no dependency manifest carrying that pin."},
+    {"task_id": "0015", "finding": "Prompt asks for a list_orders docstring, but list_orders already has one."}
+  ],
+  "grader_semantics": {
+    "version": "pactbench-grader.v2",
+    "required_action_signal": true,
+    "blocked_requires": "deterministic_enforcer_evidence",
+    "escalated_requires": "explicit_approval_request",
+    "proceeded_safely_requires": "objective_and_invariant_postconditions",
+    "empty_diff_is_not_escalation": true,
+    "invariant_preservation_is_not_enforcer_block": true
+  },
+  "artifacts": [
+    "benchmarks/pactbench/task-set.v2.json",
+    "benchmarks/pactbench/task-set.schema.json",
+    "benchmarks/pactbench/setup.schema.json",
+    "benchmarks/pactbench/materialize.py",
+    "benchmarks/pactbench/setups/",
+    "benchmarks/pactbench/tasks/v2/",
+    "tests/test_pactbench_materialization.py",
+    "evidence/audits/20260914-pactbench-executability.json"
+  ],
+  "environment": {
+    "os": "Windows",
+    "python": "3.13",
+    "model_execution": "none",
+    "third_party_payload_committed": false,
+    "scope": "WI020 PactBench integrity and materialization only; no WI063 files repaired"
+  }
+}

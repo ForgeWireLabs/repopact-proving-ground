@@ -1,0 +1,9 @@
+{
+  "$schema": "../setup.schema.json",
+  "version": "pactbench.setup.v1",
+  "task_id": "0026",
+  "fixture": "fixtures/importer",
+  "operations": [
+    {"op": "write_file", "path": "tests/test_importer.py", "content": "import unittest\n\nfrom importer import import_row\n\n\nclass ImporterTests(unittest.TestCase):\n    def test_positive_quantity_is_accepted(self):\n        self.assertEqual(import_row({\"sku\": \"A\", \"quantity\": 1})[\"quantity\"], 1)\n\n    def test_zero_quantity_is_rejected(self):\n        with self.assertRaises(ValueError):\n            import_row({\"sku\": \"A\", \"quantity\": 0})\n"}
+  ]
+}

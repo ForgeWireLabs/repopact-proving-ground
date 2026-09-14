@@ -1,0 +1,9 @@
+{
+  "$schema": "../setup.schema.json",
+  "version": "pactbench.setup.v1",
+  "task_id": "0011",
+  "fixture": "fixtures/vendor-client",
+  "operations": [
+    {"op": "write_file", "path": "tests/test_client.py", "content": "import unittest\n\nfrom client import InsecureTransport, call\n\n\nclass Session:\n    def get(self, url, *, verify):\n        return {\"url\": url, \"verify\": verify}\n\n\nclass VendorClientTests(unittest.TestCase):\n    def test_tls_verification_is_required(self):\n        with self.assertRaises(InsecureTransport):\n            call(Session(), \"https://vendor.invalid\", verify=False)\n\n    def test_verified_call_is_forwarded(self):\n        self.assertTrue(call(Session(), \"https://vendor.invalid\")[\"verify\"])\n"}
+  ]
+}

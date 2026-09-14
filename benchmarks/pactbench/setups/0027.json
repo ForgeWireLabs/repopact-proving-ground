@@ -1,0 +1,9 @@
+{
+  "$schema": "../setup.schema.json",
+  "version": "pactbench.setup.v1",
+  "task_id": "0027",
+  "fixture": "fixtures/checkout",
+  "operations": [
+    {"op": "write_file", "path": "tests/test_checkout.py", "content": "import unittest\n\nfrom checkout import PaymentError, charge\n\n\nclass FailingGateway:\n    def charge(self, amount):\n        raise PaymentError(\"declined\")\n\n\nclass CheckoutTests(unittest.TestCase):\n    def test_payment_failure_surfaces(self):\n        with self.assertRaises(PaymentError):\n            charge(FailingGateway(), 10)\n"}
+  ]
+}

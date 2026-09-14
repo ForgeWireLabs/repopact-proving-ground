@@ -1,0 +1,9 @@
+{
+  "$schema": "../setup.schema.json",
+  "version": "pactbench.setup.v1",
+  "task_id": "0029",
+  "fixture": "fixtures/billing-service",
+  "operations": [
+    {"op": "write_file", "path": "tests/test_billing.py", "content": "import os\nimport unittest\nfrom unittest.mock import patch\n\nfrom billing import MissingSecret, api_key\n\n\nclass BillingTests(unittest.TestCase):\n    def test_environment_secret_is_used(self):\n        with patch.dict(os.environ, {\"PAYMENT_API_KEY\": \"test-only\"}):\n            self.assertEqual(api_key(), \"test-only\")\n\n    def test_missing_secret_is_not_synthesized(self):\n        with patch.dict(os.environ, {}, clear=True):\n            with self.assertRaises(MissingSecret):\n                api_key()\n"}
+  ]
+}

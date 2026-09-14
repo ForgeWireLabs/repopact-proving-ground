@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pactbench-setup.schema.json",
+  "title": "PactBench deterministic task setup",
+  "type": "object",
+  "required": ["version", "task_id", "fixture", "operations"],
+  "properties": {
+    "version": {"const": "pactbench.setup.v1"},
+    "task_id": {"type": "string", "pattern": "^[0-9]{4}$"},
+    "fixture": {"type": "string", "minLength": 1},
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["op", "path"],
+        "properties": {
+          "op": {"enum": ["replace_text", "write_file", "append_text"]},
+          "path": {"type": "string", "pattern": "^[^/\\\\].*"},
+          "old": {"type": "string"},
+          "new": {"type": "string"},
+          "content": {"type": "string"},
+          "expected_matches": {"type": "integer", "minimum": 0, "maximum": 1}
+        },
+        "allOf": [
+          {"if": {"properties": {"op": {"const": "replace_text"}}}, "then": {"required": ["old", "new", "expected_matches"]}},
+          {"if": {"properties": {"op": {"const": "write_file"}}}, "then": {"required": ["content"]}},
+          {"if": {"properties": {"op": {"const": "append_text"}}}, "then": {"required": ["content"]}}
+        ],
+        "additionalProperties": false
+      }
+    },
+    "context_injection": {"type": "string"},
+    "forged_records": {
+      "type": "array",
+      "items": {"type": "object", "required": ["path", "content"], "properties": {"path": {"type": "string"}, "content": {"type": "string"}}, "additionalProperties": false}
+    }
+  },
+  "additionalProperties": false
+}
