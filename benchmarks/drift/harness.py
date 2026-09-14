@@ -59,6 +59,14 @@ def _base_repo(dst: Path) -> Path:
     assert initialized.returncode == 0, _command_output(initialized)
     validated = _run_repopact("validate", "--root", dst)
     assert validated.returncode == 0, _command_output(validated)
+    # Frozen-surface mutations are diff-time checks.  The disposable fixture
+    # therefore needs a clean Git checkpoint before the mutation is applied.
+    subprocess.run(["git", "init", "--quiet"], cwd=dst, check=True, capture_output=True)
+    subprocess.run(["git", "add", "-A"], cwd=dst, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-c", "user.name=RepoPact S5", "-c", "user.email=s5@repopact.invalid", "commit", "--quiet", "-m", "baseline"],
+        cwd=dst, check=True, capture_output=True,
+    )
     return dst
 
 
@@ -79,7 +87,75 @@ def _add_item(repo: Path, item_id: str, status: str, **over) -> Path:
 
 
 # Each mutation takes a valid repo and introduces drift. Returns a label for the firing
-# check, or None if it is a known blind spot (validate will NOT catch it).
+# check, or None if it is a known blind spot (validate will NOT catch it).  The
+# mutations are deliberately small and disposable: they exercise the registered
+# detector boundary, never the proving-ground checkout itself.
+def _registry(repo: Path) -> dict:
+    path = repo / "audits" / "registry.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return data
+
+
+def _write_registry(repo: Path, data: dict) -> None:
+    (repo / "audits" / "registry.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def m01_dangling_contract_path(repo: Path) -> None:
+    _add_item(repo, "001", "active", owner_scope="missing-scope")
+
+
+def m02_missing_registered_scope(repo: Path) -> None:
+    data = _registry(repo)
+    data["scopes"][0]["path"] = "missing-scope"
+    _write_registry(repo, data)
+
+
+def m03_codeowners_scope_mismatch(repo: Path) -> None:
+    owners_path = repo / "governance" / "owners.json"
+    data = json.loads(owners_path.read_text(encoding="utf-8"))
+    data["roles"][0]["scopes"] = ["codeowners-only"]
+    owners_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def m04_unregistered_workflow(repo: Path) -> None:
+    workflow = repo / ".github" / "workflows" / "unregistered.yml"
+    workflow.parent.mkdir(parents=True, exist_ok=True)
+    workflow.write_text("name: unregistered\n", encoding="utf-8")
+
+
+def m05_unfrozen_check_change(repo: Path) -> None:
+    path = repo / "governance" / "workflow.md"
+    path.write_text(path.read_text(encoding="utf-8") + "\n<!-- check weakened outside frozen surface -->\n", encoding="utf-8")
+
+
+def m06_split_frozen_file(repo: Path) -> None:
+    source = repo / "governance" / "invariants.json"
+    source.rename(repo / "governance" / "invariants.json.part")
+
+
+def m09_schema_version_drift(repo: Path) -> None:
+    path = repo / "VERSION"
+    path.write_text(path.read_text(encoding="utf-8").replace("3.0.2", "3.0.3", 1), encoding="utf-8")
+
+
+def m10_unknown_owner_scope(repo: Path) -> None:
+    owners_path = repo / "governance" / "owners.json"
+    data = json.loads(owners_path.read_text(encoding="utf-8"))
+    data["roles"][0]["scopes"] = ["missing-scope"]
+    owners_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def m13_hand_edited_dashboard(repo: Path) -> None:
+    # The run loop refreshes the generated dashboard first, then applies this
+    # mutation so the validator observes the derived-artifact mismatch.
+    return None
+
+
+def m14_frozen_surface_edit(repo: Path) -> None:
+    path = repo / "governance" / "invariants.json"
+    path.write_text(path.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+
+
 def m08_unregistered_contract(repo: Path) -> None:
     (repo / "mod").mkdir()
     (repo / "mod" / "AGENTS.md").write_text("# nested\n", encoding="utf-8")
@@ -114,11 +190,21 @@ def m07_acceptance_regress(repo: Path) -> None:
 
 
 MUTATIONS = [
+    ("M1", "dangling contract path", m01_dangling_contract_path, False),
+    ("M2", "missing registered scope", m02_missing_registered_scope, False),
+    ("M3", "CODEOWNERS scope mismatch", m03_codeowners_scope_mismatch, False),
+    ("M4", "unregistered CI workflow (blind spot)", m04_unregistered_workflow, True),
+    ("M5", "unfrozen check change (blind spot)", m05_unfrozen_check_change, True),
+    ("M6", "split frozen file", m06_split_frozen_file, False),
+    ("M7", "completed item, code regressed (blind spot)", m07_acceptance_regress, True),
     ("M8", "unregistered nested contract", m08_unregistered_contract, False),
+    ("M9", "standard version drift (blind spot)", m09_schema_version_drift, True),
+    ("M10", "unknown owner scope", m10_unknown_owner_scope, False),
     ("M11", "satisfied criterion -> missing evidence", m11_missing_evidence, False),
     ("M12", "dependency cycle", m12_dependency_cycle, False),
+    ("M13", "hand-edited generated dashboard", m13_hand_edited_dashboard, False),
+    ("M14", "frozen-surface edit", m14_frozen_surface_edit, False),
     ("M15", "status/dir mismatch", m15_status_dir_mismatch, False),
-    ("M7", "completed item, code regressed (blind spot)", m07_acceptance_regress, True),
 ]
 
 
@@ -134,7 +220,11 @@ def run() -> list[dict]:
             # violation or an honest blind spot such as M7.
             dashboard = _run_repopact("dashboard", "--root", repo)
             assert dashboard.returncode == 0, _command_output(dashboard)
-            validated = _run_repopact("validate", "--root", repo)
+            if mid == "M13":
+                dashboard_path = repo / "audits" / "reports" / "dashboard.md"
+                dashboard_path.write_text(dashboard_path.read_text(encoding="utf-8") + "\nhand-edited\n", encoding="utf-8")
+            detector = "check-frozen" if mid in {"M6", "M14"} else "validate"
+            validated = _run_repopact(detector, "--root", repo, *( ["--base", "HEAD"] if detector == "check-frozen" else [] ))
             detected = validated.returncode != 0
             results.append({
                 "id": mid, "label": label, "blind_spot": blind,

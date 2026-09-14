@@ -67,6 +67,7 @@ repository postconditions, so no diff alone is treated as a block or escalation.
 | `empirical.py` | Shared strict-schema empirical turn, telemetry, capture, and provenance boundary |
 | `empirical_workspace.py` | Windows-safe disposable live workspace allocator, ACL profile, direct-sandbox preflight, and security fingerprint |
 | `ac3_execution_manifest.py` | Generates the pre-inference AC-3 manifest; it never starts a cell |
+| `ac3_preflight.py` | Whole-program model-free preflight, queue collision/resume audit, fake S2/S3/S4/S6 checks, and deterministic S5 execution |
 | `admission_probe.py` | One-shot disposable family admission probe, outside the registered matrix |
 | `codex_real_runner_v2.py` | Corrected three-case smoke adapter with preflight and captures |
 | `codex_usage.py` | Pinned tokenizer and strict v2 usage accounting |
@@ -91,6 +92,24 @@ verified pinned materialization plus a study-built functional/evaluation bed;
 uses the frozen local renderers in `s4/operationalization.py`; and `s6a`/`s6b`
 require objective filesystem/postcondition evaluators. The existing deterministic
 drivers and S5 fixture self-tests remain illustrative/non-empirical.
+
+The whole-program preflight is the final gate before comparative inference. It requires
+operator-supplied S2 materializations and task beds, verifies all 543 logical cells and
+567 execution slots, exercises model-dependent adapters with fake turns only, and runs
+the 135 model-independent S5 observations. It writes `READY`/`BLOCKED` status for every
+logical cell and exits non-zero unless the result is exactly `543 READY / 0 BLOCKED`:
+
+```text
+python -m benchmarks.harness.ac3_preflight \
+  --s2-materializations <materialization-root> \
+  --s2-beds <provisioned-bed-root> \
+  --repopact-root <RepoPact-checkout>
+```
+
+`S2` functional workspaces are pinned repository base checkouts with no gold patch or
+test patch; separate evaluator counterparts contain only the registered test patch and
+the official patch-then-test procedure. The preflight is not an inference run and does
+not create comparative results.
 
 On Windows, live empirical workspaces are allocated below `REPOPACT_BENCH_WORK_ROOT`
 when set, or the repository's `.repopact-bench-workspaces` directory by default. The
