@@ -78,7 +78,7 @@
     {
       "command": "python -m unittest tests.test_pactbench_materialization tests.test_telemetry_v2 -v",
       "exit_code": 0,
-      "summary": "20 deterministic integrity, action-signal, ledger, tokenizer, v2 parser, and materialization tests passed."
+      "summary": "21 deterministic integrity, action-signal, ledger, tokenizer, v2 parser, adapter-accounting, and materialization tests passed."
     },
     {
       "command": "python -m py_compile benchmarks/harness/codex_app_server.py benchmarks/harness/codex_real_runner_v2.py benchmarks/harness/codex_usage.py benchmarks/harness/runners.py",

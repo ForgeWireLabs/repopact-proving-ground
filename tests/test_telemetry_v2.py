@@ -1,12 +1,15 @@
 import unittest
 
 from benchmarks.harness.codex_usage import (
+    AcceptedUsage,
     UsageBreakdown,
     UsageLedger,
     UsageLedgerError,
     accept_notification,
     task_token_count,
 )
+from benchmarks.harness.codex_app_server import AppServerRun
+from benchmarks.harness.codex_real_runner_v2 import _telemetry
 from benchmarks.harness.execution import EnvelopeValidationError, parse_token_usage_v2
 from benchmarks.harness.grader_v2 import ACTION_SIGNAL_VERSION, parse_action_signal, reconcile_outcome
 from benchmarks.harness.model import Outcome, Task
@@ -172,6 +175,32 @@ class TelemetryV2Tests(unittest.TestCase):
         }
         with self.assertRaises(RunnerContractError):
             parse_response_v2(payload, self._task(), "repopact", exact_command="adapter")
+
+    def test_v2_adapter_attributes_task_tokens_once_and_preserves_provider_breakdown(self):
+        first = UsageBreakdown(100, 25, 7, 10, 3, 110)
+        second = UsageBreakdown(50, 5, 2, 8, 1, 58)
+        app_run = AppServerRun(
+            events=(
+                {"method": "thread/tokenUsage/updated"},
+                {"method": "item/completed", "params": {"item": {"type": "commandExecution"}}},
+                {"method": "thread/tokenUsage/updated"},
+            ),
+            usage=(
+                (AcceptedUsage(first, first, 1), 10.0, 0),
+                (AcceptedUsage(second, UsageBreakdown(150, 30, 9, 18, 4, 168), 2), 25.0, 2),
+            ),
+            final_output="",
+            server_requests=(), thread_id="thread", turn_id="turn", elapsed_ms=30.0,
+        )
+        requests, provider_usage = _telemetry(app_run, "registered instruction", events=app_run.events)
+        self.assertEqual(len(requests), 2)
+        self.assertGreater(requests[0].task_tokens, 0)
+        self.assertEqual(requests[1].task_tokens, 0)
+        self.assertEqual(requests[0].context_tokens + requests[0].task_tokens, requests[0].input_tokens)
+        self.assertEqual(requests[0].cache_write_input_tokens, 7)
+        self.assertEqual(requests[1].cache_write_input_tokens, 2)
+        self.assertEqual(requests[0].tool_calls, 1)
+        self.assertEqual(provider_usage["source"], "public Codex app-server thread/tokenUsage/updated")
 
 
 if __name__ == "__main__":
