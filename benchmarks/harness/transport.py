@@ -214,7 +214,7 @@ class ClaudeCodeTransport:
         cwd: str,
         pricing_id: str,
         timeout_seconds: int,
-        executable: str = "claude",
+        executable: str | None = None,
     ) -> None:
         if model.provider != "anthropic" or model.family != "claude-sonnet-5" or model.version != "claude-sonnet-5":
             raise EmpiricalTransportError("ClaudeCodeTransport requires the exact claude-sonnet-5/anthropic/claude-sonnet-5 identity")
@@ -222,24 +222,29 @@ class ClaudeCodeTransport:
         self.cwd = str(Path(cwd).resolve())
         self.pricing_id = pricing_id
         self.timeout_seconds = timeout_seconds
-        self.executable = executable
+        self.executable = executable or os.environ.get("REPOPACT_CLAUDE_CODE_BIN", "claude")
 
-    def _command(self) -> list[str]:
+    def _command(self, output_schema: dict[str, Any]) -> list[str]:
         # ``-p`` reads the prompt from stdin when no positional prompt is given.
-        # These are all public Claude Code flags; acceptEdits is recorded as
-        # provider-native provenance and is not presented as RepoPact behavior.
+        # These are all public Claude Code flags.  The explicit tool and prompt
+        # controls make an admission deterministic and non-interactive, while
+        # acceptEdits remains provider-native provenance rather than RepoPact
+        # behavior.
         return [
             self.executable, "-p",
             "--output-format", "stream-json",
+            "--json-schema", json.dumps(output_schema, separators=(",", ":"), sort_keys=True),
             "--verbose",
             "--model", self.model.version,
             "--permission-mode", "acceptEdits",
+            "--permission-prompts", "none",
+            "--tools", "Read,Write,Edit,Bash",
             "--allowedTools", "Read,Write,Edit,Bash",
             "--no-session-persistence",
         ]
 
     def run(self, prompt: str, *, output_schema: dict[str, Any]) -> TransportRun:
-        command = self._command()
+        command = self._command(output_schema)
         started = time.monotonic()
         try:
             process = subprocess.Popen(
@@ -398,6 +403,8 @@ class ClaudeCodeTransport:
             "session_id": session,
             "reported_model": self.model.version,
             "permission_mode": "acceptEdits",
+            "permission_prompts": "none",
+            "tools": ["Read", "Write", "Edit", "Bash"],
             "allowed_tools": ["Read", "Write", "Edit", "Bash"],
             "process_lifecycle": lifecycle,
             "stderr": stderr,

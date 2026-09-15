@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import tempfile
 import unittest
@@ -70,6 +71,9 @@ class ClaudeTransportTests(unittest.TestCase):
         self.assertEqual(process.communicated, "read the fixture")
         command = popen.call_args.args[0]
         self.assertEqual(command[command.index("--model") + 1], "claude-sonnet-5")
+        self.assertEqual(command[command.index("--permission-prompts") + 1], "none")
+        self.assertEqual(command[command.index("--tools") + 1], "Read,Write,Edit,Bash")
+        self.assertEqual(json.loads(command[command.index("--json-schema") + 1]), SCHEMA)
         self.assertEqual(run.model, IDENTITY)
         self.assertEqual(run.thread_id, "sess-1")
         self.assertEqual(run.per_request[0].input_tokens, 115)
@@ -120,6 +124,10 @@ class ClaudeTransportTests(unittest.TestCase):
             with self.assertRaisesRegex(EmpiricalTransportError, "timed out"):
                 self.transport().run("read", output_schema=SCHEMA)
         self.assertTrue(process.killed)
+
+    def test_environment_selects_installed_executable(self):
+        with patch.dict(os.environ, {"REPOPACT_CLAUDE_CODE_BIN": "C:/installed/claude.exe"}):
+            self.assertEqual(self.transport()._command(SCHEMA)[0], "C:/installed/claude.exe")
 
     def test_shared_executor_normalizes_provider_specific_unavailable_fields(self):
         usage = TokenUsage(
