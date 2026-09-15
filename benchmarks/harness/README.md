@@ -55,6 +55,16 @@ and deterministic context/task attribution; aggregate telemetry must equal the e
 of request records. The structured `pactbench.action-signal.v1` is reconciled with
 repository postconditions, so no diff alone is treated as a block or escalation.
 
+The provider-neutral empirical boundary is `EmpiricalTransport`. The published
+`CodexAppServerTransport` preserves the v2 public Codex app-server ledger, cache, reasoning,
+tool, lifecycle, and workspace semantics. `ClaudeCodeTransport` uses Claude Code's
+documented headless `stream-json` events with the exact `claude-sonnet-5` identity and
+provider-native permission/thinking configuration. Assistant/message usage events are
+normalized per response; input, output, cache-read, cache-creation, tools, session, and
+cost fields are retained as exposed. Unavailable provider fields remain `null` and are
+listed in telemetry; they are never silently converted to zero. Aggregate-only usage is
+rejected for AC-2. Claude runs use the additive `repopact.experiment-run.v3` envelope.
+
 ## Files
 
 | File | Role |
@@ -64,6 +74,7 @@ repository postconditions, so no diff alone is treated as a block or escalation.
 | `run.schema.json` | Machine-readable envelope shape/version |
 | `runners.py` | Versioned `MockRunner`, `RealRunner` (gated), `get_runner` |
 | `codex_app_server.py` | Public app-server stdio client and advancing token ledger feed |
+| `transport.py` | Provider-neutral empirical transport plus Codex and Claude Code adapters |
 | `empirical.py` | Shared strict-schema empirical turn, telemetry, capture, and provenance boundary |
 | `empirical_workspace.py` | Windows-safe disposable live workspace allocator, ACL profile, direct-sandbox preflight, and security fingerprint |
 | `ac3_execution_manifest.py` | Generates the pre-inference AC-3 manifest; it never starts a cell |
@@ -95,8 +106,9 @@ drivers and S5 fixture self-tests remain illustrative/non-empirical.
 
 The whole-program preflight is the final gate before comparative inference. It requires
 operator-supplied S2 materializations and task beds, verifies all 543 logical cells and
-567 execution slots, exercises model-dependent adapters with fake turns only, and runs
-the 135 model-independent S5 observations. It writes `READY`/`BLOCKED` status for every
+567 execution slots, exercises model-dependent adapters with fake turns only, and
+references the already completed 135 model-independent S5 observations without rerunning
+them. It writes `READY`/`BLOCKED` status for every
 logical cell and exits non-zero unless the result is exactly `543 READY / 0 BLOCKED`:
 
 ```text
