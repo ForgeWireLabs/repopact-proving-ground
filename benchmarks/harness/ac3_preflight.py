@@ -32,8 +32,8 @@ from .empirical_workspace import EmpiricalWorkspace
 from .model import TokenUsage
 
 
-REPORT_SCHEMA_VERSION = "repopact.wi022-ac3-whole-program-preflight.v1"
-REPORT_RUN_ID = "20260914-wi022-ac3-whole-program-preflight"
+REPORT_SCHEMA_VERSION = "repopact.wi022-ac3-whole-program-preflight.v2"
+REPORT_RUN_ID = "20260914-wi022-ac3-whole-program-preflight-v3"
 S4_METHOD_VERSION = "2026-09-14.s4-methods.1"
 S5_METHOD_VERSION = "2026-09-14.s5-model-independent.1"
 S5_MUTATION_SET_VERSION = "drift-mutations.json"
@@ -222,7 +222,7 @@ def _s2_preflight(materialization_root: Path, beds_root: Path) -> dict[str, Any]
     }
 
 
-def _s3_preflight(security: dict[str, Any]) -> dict[str, Any]:
+def _s3_preflight(security: dict[str, Any], models: list[dict[str, Any]]) -> dict[str, Any]:
     from unittest.mock import patch
     task_set = load_s3_task_set()
     fixture_root = ROOT / "benchmarks"
@@ -243,7 +243,8 @@ def _s3_preflight(security: dict[str, Any]) -> dict[str, Any]:
         for task in task_set.records:
             for condition in ("baseline", "repopact"):
                 for repetition in range(3):
-                    for model_version in ("gpt-5.6-luna", "gpt-6-astra"):
+                    for model in models:
+                        model_version = model["version"]
                         try:
                             result = adapter.run_case(
                                 task, condition, source=fixture_root / task["fixture"], repetition=repetition,
@@ -267,7 +268,7 @@ def _s3_preflight(security: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _s4_preflight(security: dict[str, Any], repopact_root: Path) -> dict[str, Any]:
+def _s4_preflight(security: dict[str, Any], repopact_root: Path, models: list[dict[str, Any]]) -> dict[str, Any]:
     task_set = load_s4_task_set()
     conditions = ("C0", "C1", "C2", "C2+C3", "C3", "C4", "C5", "C6", "C7", "C8")
     rendered_fingerprints: dict[str, str] = {}
@@ -293,7 +294,7 @@ def _s4_preflight(security: dict[str, Any], repopact_root: Path) -> dict[str, An
                             workspace_identity={"security_contract": security["fingerprint"]},
                             capture_name=f"fake/S4/{task['id']}/{condition}/r{repetition}.json",
                         )
-                        executed += 2  # two admitted model-family slots share this fake adapter check
+                        executed += len(models)  # each admitted model-family slot shares this fake adapter check
                 except Exception as exc:
                     failures.append(f"{task['id']}/{condition}: {type(exc).__name__}: {exc}")
     return {
@@ -309,55 +310,53 @@ def _s4_preflight(security: dict[str, Any], repopact_root: Path) -> dict[str, An
     }
 
 
-def _s5_preflight() -> dict[str, Any]:
-    from ..drift import harness as drift_harness
+def _s5_preflight(s5_evidence_path: Path, manifest: dict[str, Any]) -> dict[str, Any]:
+    """Reference the published S5 observations without executing them again."""
     mutation_ids = [item["id"] for item in _load(ROOT / "benchmarks/drift/mutations.json")["mutations"]]
-    rows: list[dict[str, Any]] = []
     failures: list[str] = []
-    for condition in ("C2", "C2+C3", "C7"):
-        for repetition in range(3):
-            try:
-                raw_rows = drift_harness.run()
-                if [row["id"] for row in raw_rows] != mutation_ids:
-                    raise RuntimeError("S5 mutation enumeration diverged from the registered mutation set")
-                for raw in raw_rows:
-                    observation = adapt_result(raw, condition=condition)
-                    expected_blind = raw["blind_spot"]
-                    if raw["repopact_detected"] == expected_blind:
-                        # A non-blind mutation must be caught; a blind spot must remain uncaught.
-                        raise RuntimeError(f"unexpected deterministic detection for {raw['id']}")
-                    rows.append({
-                        "mutation_id": observation.mutation_id,
-                        "condition": condition,
-                        "repetition": repetition,
-                        "seed": int.from_bytes(hashlib.sha256(f"S5|{S5_METHOD_VERSION}|{observation.mutation_id}|{condition}|{repetition}".encode()).digest()[:8], "big"),
-                        "detected": observation.detected,
-                        "blind_spot": observation.blind_spot,
-                        "latency": observation.latency,
-                        "false_drift": observation.false_drift,
-                        "reconciliation_cost": observation.reconciliation_cost,
-                        "model_calls": 0,
-                    })
-            except Exception as exc:
-                failures.append(f"{condition}/r{repetition}: {type(exc).__name__}: {exc}")
+    try:
+        prior = _load(s5_evidence_path)
+        phase = prior.get("phases", {}).get("S5", {})
+        prior_manifest_path = ROOT / "evidence/runs/20260914-wi022-ac3-execution-manifest-v2.json"
+        prior_manifest = _load(prior_manifest_path)
+        current_s5 = [cell for cell in manifest["cells"] if cell["study"] == "S5"]
+        prior_s5 = [cell for cell in prior_manifest.get("cells", []) if cell.get("study") == "S5"]
+        if phase.get("status") != "READY" or phase.get("logical_cells") != 135:
+            failures.append("published S5 evidence is not READY for reference")
+        if phase.get("fake_or_deterministic_cells_passed") != 135 or phase.get("model_calls") != 0:
+            failures.append("published S5 evidence does not prove 135 model-free observations")
+        if phase.get("method_version") != S5_METHOD_VERSION or phase.get("mutation_set_version") != S5_MUTATION_SET_VERSION:
+            failures.append("published S5 method or mutation-set version diverges")
+        if phase.get("registered_conditions") != ["C2", "C2+C3", "C7"] or phase.get("repetitions") != 3:
+            failures.append("published S5 condition/repetition registration diverges")
+        if [cell.get("cell_id") for cell in current_s5] != [cell.get("cell_id") for cell in prior_s5]:
+            failures.append("v3 S5 cell identity/order diverges from published deterministic evidence")
+        if any(cell.get("model") is not None for cell in current_s5):
+            failures.append("v3 S5 cells unexpectedly carry a model identity")
+        if len(mutation_ids) != 15 or len(current_s5) != 135:
+            failures.append("current S5 mutation/cell count is not 15 mutations × 3 conditions × 3 repetitions")
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        failures.append(f"could not reference published S5 evidence: {type(exc).__name__}: {exc}")
     return {
-        "status": "READY" if not failures and len(rows) == 135 else "BLOCKED",
+        "status": "READY" if not failures else "BLOCKED",
         "logical_cells": 135,
-        "fake_or_deterministic_cells_passed": len(rows),
+        "fake_or_deterministic_cells_passed": 135 if not failures else 0,
         "mutation_count": len(mutation_ids),
         "registered_conditions": ["C2", "C2+C3", "C7"],
         "repetitions": 3,
         "method_version": S5_METHOD_VERSION,
         "mutation_set_version": S5_MUTATION_SET_VERSION,
-        "blind_spots_and_scorer": {"rows_digest": _digest(rows), "summarizer": "s5-drift-adapter.v1"},
+        "blind_spots_and_scorer": phase.get("blind_spots_and_scorer", {}) if not failures else {},
+        "evidence_reference": str(s5_evidence_path),
+        "manifest_reference": str(ROOT / "evidence/runs/20260914-wi022-ac3-execution-manifest-v2.json"),
+        "execution": "referenced-published-deterministic-observations; no S5 rerun",
         "model_calls": 0,
         "blockers": failures,
-        "passed": not failures and len(rows) == 135,
-        "rows": rows,
+        "passed": not failures,
     }
 
 
-def _s6_preflight(security: dict[str, Any]) -> dict[str, Any]:
+def _s6_preflight(security: dict[str, Any], models: list[dict[str, Any]]) -> dict[str, Any]:
     task_set_data = _load(ROOT / "benchmarks/pactbench/task-set.v2.json")
     audit = audit_task_set(task_set_data)
     s6a_tasks = load_registered_tasks()
@@ -375,7 +374,7 @@ def _s6_preflight(security: dict[str, Any]) -> dict[str, Any]:
                             workspace_identity={"security_contract": security["fingerprint"]},
                             capture_name=f"fake/S6a/{task['id']}/{condition}/r{repetition}.json", repetition=repetition, seed=repetition,
                         )
-                        counts["S6a"] += 2
+                        counts["S6a"] += len(models)
                     except Exception as exc:
                         failures.append(f"S6a/{task['id']}/{condition}/r{repetition}: {type(exc).__name__}: {exc}")
         for task in s6b_tasks:
@@ -387,7 +386,7 @@ def _s6_preflight(security: dict[str, Any]) -> dict[str, Any]:
                             workspace_identity={"security_contract": security["fingerprint"]},
                             capture_name=f"fake/S6b/{task['id']}/{condition}/r{repetition}.json", repetition=repetition, seed=repetition,
                         )
-                        counts["S6b"] += 2
+                        counts["S6b"] += len(models)
                     except Exception as exc:
                         failures.append(f"S6b/{task['id']}/{condition}/r{repetition}: {type(exc).__name__}: {exc}")
     audit_passed = audit["effective_ineligible_count"] == 0 and audit["grader_invalid_count"] == 0
@@ -407,7 +406,7 @@ def _s6_preflight(security: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def run_preflight(root: str | Path, *, manifest_path: str | Path, materialization_root: str | Path, beds_root: str | Path, repopact_root: str | Path | None = None) -> dict[str, Any]:
+def run_preflight(root: str | Path, *, manifest_path: str | Path, materialization_root: str | Path, beds_root: str | Path, repopact_root: str | Path | None = None, s5_evidence_path: str | Path | None = None) -> dict[str, Any]:
     global ROOT
     ROOT = Path(root).resolve()
     records_root = Path(repopact_root).resolve() if repopact_root is not None else ROOT
@@ -416,6 +415,9 @@ def run_preflight(root: str | Path, *, manifest_path: str | Path, materializatio
         manifest_file = ROOT / manifest_file
     manifest = _load(manifest_file)
     _, queue = _queue(manifest)
+    s5_reference = Path(s5_evidence_path) if s5_evidence_path is not None else ROOT / "evidence/runs/20260914-wi022-ac3-whole-program-preflight.json"
+    if not s5_reference.is_absolute():
+        s5_reference = ROOT / s5_reference
     phases: dict[str, dict[str, Any]] = {}
     phases["manifest"] = _manifest_preflight(ROOT, manifest_file)
     try:
@@ -423,10 +425,10 @@ def run_preflight(root: str | Path, *, manifest_path: str | Path, materializatio
             security = allocation.security
             phases["workspace_security"] = {"status": "READY", "security": security, "passed": True}
             phases["S2"] = _s2_preflight(Path(materialization_root), Path(beds_root))
-            phases["S3"] = _s3_preflight(security)
-            phases["S4"] = _s4_preflight(security, records_root)
-            phases["S5"] = _s5_preflight()
-            phases["S6"] = _s6_preflight(security)
+            phases["S3"] = _s3_preflight(security, manifest["models"])
+            phases["S4"] = _s4_preflight(security, records_root, manifest["models"])
+            phases["S5"] = _s5_preflight(s5_reference, manifest)
+            phases["S6"] = _s6_preflight(security, manifest["models"])
             for study, count in (("S6a", 108), ("S6b", 24)):
                 phases[study] = {
                     "status": phases["S6"]["status"],
@@ -447,7 +449,7 @@ def run_preflight(root: str | Path, *, manifest_path: str | Path, materializatio
             "cell_id": cell["cell_id"],
             "study": cell["study"],
             "model_dependent": cell["model_dependent"],
-            "execution_mode": "deterministic-executed" if cell["study"] == "S5" else "model-dependent-preflight-only",
+            "execution_mode": "referenced-deterministic-evidence" if cell["study"] == "S5" else "model-dependent-preflight-only",
             "status": "READY" if ready else "BLOCKED",
             "blockers": [] if ready else list(phase.get("blockers", [])),
         })
@@ -490,13 +492,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--s2-materializations", required=True)
     parser.add_argument("--s2-beds", required=True)
     parser.add_argument("--repopact-root", default=None, help="RepoPact checkout supplying the C7/C8 records")
-    parser.add_argument("--out", default="evidence/runs/20260914-wi022-ac3-whole-program-preflight.json")
+    parser.add_argument("--s5-evidence", default=None, help="Published preflight report containing the completed model-independent S5 observations")
+    parser.add_argument("--out", default="evidence/runs/20260914-wi022-ac3-whole-program-preflight-v3.json")
     args = parser.parse_args(argv)
     root = Path(args.root).resolve() if args.root else Path(__file__).resolve().parents[2]
     output = Path(args.out)
     if not output.is_absolute():
         output = root / output
-    report = run_preflight(root, manifest_path=args.manifest, materialization_root=args.s2_materializations, beds_root=args.s2_beds, repopact_root=args.repopact_root)
+    report = run_preflight(root, manifest_path=args.manifest, materialization_root=args.s2_materializations, beds_root=args.s2_beds, repopact_root=args.repopact_root, s5_evidence_path=args.s5_evidence)
     _atomic_json(output, report)
     print(json.dumps({"status": report["status"], "counts": report["counts"], "out": str(output)}, sort_keys=True))
     return 0 if report["status"] == "READY" else 1

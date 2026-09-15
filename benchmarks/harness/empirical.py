@@ -27,6 +27,7 @@ from .execution import (
     require_valid_envelope,
 )
 from .model import TokenUsage
+from .transport import EmpiricalTransport, build_transport
 
 
 EMPIRICAL_EXECUTOR_VERSION = "repopact.codex-empirical.v1"
@@ -174,6 +175,9 @@ class EmpiricalTurn:
     schema_identity: dict[str, Any]
     provenance: dict[str, Any]
     turn_completed_elapsed_ms: float | None = None
+    exact_command: str = PUBLIC_APP_SERVER_COMMAND
+    schema_version: str = RUN_SCHEMA_VERSION_V2
+    runner_contract_version: str = REAL_RUNNER_CONTRACT_VERSION_V2
 
     def validate(self) -> None:
         if self.provenance.get("classification") != "empirical":
@@ -224,7 +228,7 @@ class EmpiricalTurn:
     ) -> RunEnvelope:
         self.validate()
         envelope = RunEnvelope(
-            schema_version=RUN_SCHEMA_VERSION_V2,
+            schema_version=self.schema_version,
             study_id=study_id,
             case_id=case_id,
             condition=condition,
@@ -245,7 +249,7 @@ class EmpiricalTurn:
             aggregate=self.aggregate,
             observations=observations or {},
             raw_capture_ref=self.capture_ref,
-            exact_command=PUBLIC_APP_SERVER_COMMAND,
+            exact_command=self.exact_command,
             provenance={**self.provenance, "capture_digest": self.capture_digest},
             notes=notes,
             illustrative=False,
@@ -267,6 +271,7 @@ class EmpiricalExecutor:
         output_schema: dict[str, Any],
         runtime_version: str = "codex-cli-public-app-server-v2",
         workspace_root: str | Path | None = None,
+        transport: EmpiricalTransport | None = None,
     ) -> None:
         if (
             not isinstance(output_schema, dict)
@@ -283,6 +288,12 @@ class EmpiricalExecutor:
         self.output_schema = output_schema
         self.runtime_version = runtime_version
         self.workspace_root = workspace_root
+        self.transport = transport or build_transport(
+            model=model,
+            cwd=self.cwd,
+            pricing_id=pricing_id,
+            timeout_seconds=timeout_seconds,
+        )
 
     def run(
         self,
@@ -309,16 +320,19 @@ class EmpiricalExecutor:
             raise EmpiricalContractError(f"empirical workspace security preflight failed before inference: {exc}") from exc
         destination, capture_ref = _safe_capture_path(self.capture_root, capture_name)
         started_at = _now()
-        app_run = CodexAppServer(
-            model=self.model.version,
-            provider=self.model.provider,
-            cwd=self.cwd,
-            timeout_seconds=self.timeout_seconds,
-            output_schema=self.output_schema,
-        ).run(prompt)
+        try:
+            transport_run = self.transport.run(prompt, output_schema=self.output_schema)
+        except Exception as exc:
+            if isinstance(exc, EmpiricalContractError):
+                raise
+            raise EmpiricalContractError(f"empirical transport failed closed: {exc}") from exc
+        if transport_run.model != self.model:
+            raise EmpiricalContractError(
+                f"transport reported model {transport_run.model!r}, expected {self.model!r}"
+            )
         ended_at = _now()
         try:
-            structured = json.loads(app_run.final_output)
+            structured = json.loads(transport_run.final_output)
         except (TypeError, json.JSONDecodeError) as exc:
             raise EmpiricalContractError("final app-server output was not JSON") from exc
         try:
@@ -328,17 +342,15 @@ class EmpiricalExecutor:
             raise EmpiricalContractError("jsonschema is required for empirical output validation") from exc
         except Exception as exc:
             raise EmpiricalContractError(f"final output failed empirical schema validation: {exc}") from exc
-        requests, telemetry = telemetry_from_app_run(
-            app_run, prompt, identity=self.model, pricing_id=self.pricing_id,
-        )
+        requests = list(transport_run.per_request)
+        if not requests:
+            raise EmpiricalContractError("empirical transport returned no request-level telemetry")
+        telemetry = transport_run.telemetry
         aggregate = aggregate_telemetry(requests)
         runtime_identity = {
             "executor_version": EMPIRICAL_EXECUTOR_VERSION,
             "runtime_version": self.runtime_version,
-            "command": PUBLIC_APP_SERVER_COMMAND,
-            "initialize_result": app_run.initialize_result,
-            "thread_result": app_run.thread_result,
-            "process_lifecycle": app_run.process_lifecycle or {},
+            **transport_run.runtime_identity,
         }
         schema_identity = {
             "schema_digest": _digest(self.output_schema),
@@ -347,7 +359,7 @@ class EmpiricalExecutor:
         provenance = {
             "classification": "empirical",
             "executor_version": EMPIRICAL_EXECUTOR_VERSION,
-            "runner_contract_version": REAL_RUNNER_CONTRACT_VERSION_V2,
+            "runner_contract_version": transport_run.runner_contract_version,
             "study_id": study_id,
             "case_id": case_id,
             "condition": condition,
@@ -366,19 +378,19 @@ class EmpiricalExecutor:
             "provenance": provenance,
             "runtime_identity": runtime_identity,
             "schema_identity": schema_identity,
-            "thread_id": app_run.thread_id,
-            "turn_id": app_run.turn_id,
+            "thread_id": transport_run.thread_id,
+            "turn_id": transport_run.turn_id,
             "model": asdict(self.model),
             "prompt": prompt,
             "final_output": structured,
-            "final_output_text": app_run.final_output,
-            "raw_events": list(app_run.events),
-            "server_requests": list(app_run.server_requests),
+            "final_output_text": transport_run.final_output,
+            "raw_events": list(transport_run.events),
+            "server_requests": list(transport_run.server_requests),
             "per_request": [asdict(item) for item in requests],
             "aggregate": asdict(aggregate),
             "telemetry": telemetry,
-            "elapsed_ms": app_run.elapsed_ms,
-            "turn_completed_elapsed_ms": app_run.turn_completed_elapsed_ms,
+            "elapsed_ms": transport_run.elapsed_ms,
+            "turn_completed_elapsed_ms": transport_run.turn_completed_elapsed_ms,
             "tool_calls": aggregate.tool_calls,
             "capture_ref": capture_ref,
             "workspace_security": workspace_security,
@@ -393,15 +405,15 @@ class EmpiricalExecutor:
         turn = EmpiricalTurn(
             model=self.model,
             provider=self.model.provider,
-            thread_id=app_run.thread_id,
-            turn_id=app_run.turn_id,
-            raw_events=app_run.events,
-            server_requests=app_run.server_requests,
+            thread_id=transport_run.thread_id,
+            turn_id=transport_run.turn_id,
+            raw_events=transport_run.events,
+            server_requests=transport_run.server_requests,
             final_output=structured,
-            final_output_text=app_run.final_output,
+            final_output_text=transport_run.final_output,
             per_request=tuple(requests),
             aggregate=aggregate,
-            elapsed_ms=app_run.elapsed_ms,
+            elapsed_ms=transport_run.elapsed_ms,
             tool_calls=aggregate.tool_calls,
             telemetry=telemetry,
             capture_ref=capture_ref,
@@ -409,7 +421,10 @@ class EmpiricalExecutor:
             runtime_identity=runtime_identity,
             schema_identity=schema_identity,
             provenance=provenance,
-            turn_completed_elapsed_ms=app_run.turn_completed_elapsed_ms,
+            turn_completed_elapsed_ms=transport_run.turn_completed_elapsed_ms,
+            exact_command=transport_run.exact_command,
+            schema_version=transport_run.schema_version,
+            runner_contract_version=transport_run.runner_contract_version,
         )
         turn.validate()
         return turn

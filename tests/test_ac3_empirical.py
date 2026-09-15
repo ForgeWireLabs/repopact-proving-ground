@@ -146,6 +146,17 @@ class S5AndManifestTests(unittest.TestCase):
         self.assertEqual(manifest["counts"]["live_model_or_worker_turns"], 432)
         self.assertEqual(manifest["counts"]["shared_deterministic_cells"], 135)
         self.assertTrue(all(cell["model"] is None for cell in manifest["cells"] if cell["study"] == "S5"))
+        self.assertEqual(
+            manifest["models"],
+            [
+                {"family": "gpt-5.6", "provider": "openai", "version": "gpt-5.6-luna"},
+                {"family": "claude-sonnet-5", "provider": "anthropic", "version": "claude-sonnet-5"},
+            ],
+        )
+        self.assertEqual(
+            {model["version"]: sum(cell["model"] == model for cell in manifest["cells"]) for model in manifest["models"]},
+            {"gpt-5.6-luna": 204, "claude-sonnet-5": 204},
+        )
 
 
 class S2Tests(unittest.TestCase):

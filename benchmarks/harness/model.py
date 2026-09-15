@@ -27,11 +27,16 @@ class TokenUsage:
     context_tokens: int = 0   # the slice spent orienting (vs the task itself)
     task_tokens: int = 0
     requests: int = 0
-    usd: float = 0.0
+    # ``None`` is reserved for provider runtimes that do not expose a monetary
+    # value.  It is never serialized as a fabricated zero.
+    usd: float | None = 0.0
     cached_tokens: int = 0
     cached_input_tokens: int = 0
     cache_write_input_tokens: int = 0
-    reasoning_output_tokens: int = 0
+    # Claude Code may expose thinking content without a separately metered
+    # reasoning count.  ``None`` records that absence; Codex remains integer
+    # valued as in the published v2 contract.
+    reasoning_output_tokens: int | None = 0
     cache_adjusted_input_tokens: int = 0
     pricing_id: str | None = None
     provider: str | None = None
@@ -46,11 +51,15 @@ class TokenUsage:
             context_tokens=self.context_tokens + other.context_tokens,
             task_tokens=self.task_tokens + other.task_tokens,
             requests=self.requests + other.requests,
-            usd=round(self.usd + other.usd, 6),
+            usd=(round(self.usd + other.usd, 6) if self.usd is not None and other.usd is not None else None),
             cached_tokens=self.cached_tokens + other.cached_tokens,
             cached_input_tokens=self.cached_input_tokens + other.cached_input_tokens,
             cache_write_input_tokens=self.cache_write_input_tokens + other.cache_write_input_tokens,
-            reasoning_output_tokens=self.reasoning_output_tokens + other.reasoning_output_tokens,
+            reasoning_output_tokens=(
+                self.reasoning_output_tokens + other.reasoning_output_tokens
+                if self.reasoning_output_tokens is not None and other.reasoning_output_tokens is not None
+                else None
+            ),
             cache_adjusted_input_tokens=self.cache_adjusted_input_tokens + other.cache_adjusted_input_tokens,
             pricing_id=self.pricing_id or other.pricing_id,
             provider=self.provider or other.provider,

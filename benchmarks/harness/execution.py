@@ -20,6 +20,8 @@ RUN_SCHEMA_VERSION = "repopact.experiment-run.v1"
 REAL_RUNNER_CONTRACT_VERSION = "repopact.real-runner.v1"
 RUN_SCHEMA_VERSION_V2 = "repopact.experiment-run.v2"
 REAL_RUNNER_CONTRACT_VERSION_V2 = "repopact.real-runner.v2"
+RUN_SCHEMA_VERSION_V3 = "repopact.experiment-run.v3"
+REAL_RUNNER_CONTRACT_VERSION_V3 = "repopact.real-runner.v3"
 
 
 class EnvelopeValidationError(ValueError):
@@ -99,11 +101,15 @@ def validate_token_usage(usage: TokenUsage, *, path: str = "tokens") -> list[str
     )
     for name in integer_fields:
         value = getattr(usage, name)
+        if name == "reasoning_output_tokens" and value is None and usage.provider == "anthropic":
+            continue
         if not isinstance(value, int) or isinstance(value, bool):
             problems.append(f"{path}.{name} must be an integer")
         elif value < 0:
             problems.append(f"{path}.{name} must be non-negative")
-    if not isinstance(usage.usd, (int, float)) or isinstance(usage.usd, bool):
+    if usage.usd is None and usage.provider == "anthropic":
+        pass
+    elif not isinstance(usage.usd, (int, float)) or isinstance(usage.usd, bool):
         problems.append(f"{path}.usd must be a number")
     elif usage.usd < 0:
         problems.append(f"{path}.usd must be non-negative")
@@ -131,8 +137,8 @@ def validate_envelope(envelope: RunEnvelope, *, empirical: bool | None = None) -
     for name in required_strings:
         if not isinstance(getattr(envelope, name), str) or not getattr(envelope, name).strip():
             problems.append(f"{name} must be a non-empty string")
-    if envelope.schema_version not in {RUN_SCHEMA_VERSION, RUN_SCHEMA_VERSION_V2}:
-        problems.append(f"schema_version must be {RUN_SCHEMA_VERSION} or {RUN_SCHEMA_VERSION_V2}")
+    if envelope.schema_version not in {RUN_SCHEMA_VERSION, RUN_SCHEMA_VERSION_V2, RUN_SCHEMA_VERSION_V3}:
+        problems.append(f"schema_version must be {RUN_SCHEMA_VERSION}, {RUN_SCHEMA_VERSION_V2}, or {RUN_SCHEMA_VERSION_V3}")
     if not isinstance(envelope.repetition, int) or isinstance(envelope.repetition, bool) or envelope.repetition < 0:
         problems.append("repetition must be a non-negative integer")
     if not isinstance(envelope.completed, bool) or not isinstance(envelope.success, bool):

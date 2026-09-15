@@ -13,11 +13,11 @@ from ..s5.adapter import condition_implementation_fingerprint as s5_condition_im
 
 FROZEN_CORPUS_VERSION = "pactbench-2026-09-14-materialized-v2"
 FROZEN_CORPUS_DIGEST = "a9f490fb41cd47b366ff3f3268df92ea24400dd366cdf3f407587e9a5aafed54"
-MANIFEST_VERSION = "wi022-ac3-execution-manifest.v2"
-SUPERCEDES = "20260914-wi022-ac3-execution-manifest.json"
+MANIFEST_VERSION = "wi022-ac3-execution-manifest.v3"
+SUPERCEDES = "20260914-wi022-ac3-execution-manifest-v2.json"
 MODELS = (
     {"family": "gpt-5.6", "provider": "openai", "version": "gpt-5.6-luna"},
-    {"family": "gpt-6", "provider": "openai", "version": "gpt-6-astra"},
+    {"family": "claude-sonnet-5", "provider": "anthropic", "version": "claude-sonnet-5"},
 )
 # Registration digests are frozen from the published checkpoint.  They are kept
 # as constants because Windows checkout line-ending conversion must not change a
@@ -151,6 +151,7 @@ def build_manifest(root: str | Path | None = None) -> dict[str, Any]:
         "cells": cells,
         "notes": [
             "This is a generated execution plan, not a result file.",
+            "Protocol amendment 2026-09-14.ac3-model-family-amendment.1 replaces prospective GPT-6 Astra with Claude Sonnet 5 before comparative inference; historical Astra evidence is immutable.",
             "Logical-cell count preserves the old S3 definition; execution slots are 567 because each S3 logical cell has two live worker turns.",
             "S3 worker_turns=2 means one logical cell launches two concurrent isolated worker turns.",
             "S4 C4 and C5 use local deterministic implementations; no auxiliary model, embedding API, or memory service calls are permitted.",
@@ -162,7 +163,7 @@ def build_manifest(root: str | Path | None = None) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate the WI022 AC-3 pre-inference execution manifest")
     parser.add_argument("--root", default=None)
-    parser.add_argument("--out", default="evidence/runs/20260914-wi022-ac3-execution-manifest-v2.json")
+    parser.add_argument("--out", default="evidence/runs/20260914-wi022-ac3-execution-manifest-v3.json")
     args = parser.parse_args(argv)
     output = Path(args.out)
     if not output.is_absolute():

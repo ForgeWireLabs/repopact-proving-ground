@@ -8,7 +8,7 @@ import time
 from dataclasses import asdict
 from pathlib import Path
 
-from .empirical import EMPIRICAL_EXECUTOR_VERSION, EmpiricalExecutor
+from .empirical import EMPIRICAL_EXECUTOR_VERSION, EmpiricalContractError, EmpiricalExecutor
 from .empirical_workspace import EmpiricalWorkspace
 from .execution import ModelIdentity
 from .workspace_io import WorkspaceIOError, read_bytes_after_quiescence
@@ -28,7 +28,7 @@ ADMISSION_SCHEMA = {
 
 FAMILIES = {
     "gpt-5.6": ModelIdentity("gpt-5.6", "openai", "gpt-5.6-luna"),
-    "gpt-6": ModelIdentity("gpt-6", "openai", "gpt-6-astra"),
+    "claude-sonnet-5": ModelIdentity("claude-sonnet-5", "anthropic", "claude-sonnet-5"),
 }
 
 
@@ -57,23 +57,37 @@ def run_probe(family: str, *, capture_root: str | Path) -> dict[str, object]:
             model=identity,
             cwd=workspace,
             capture_root=capture_root,
-            pricing_id="chatgpt-subscription-unmetered-2026-09-14",
+            pricing_id=("anthropic-claude-code-client-estimate-2026-09-14" if identity.provider == "anthropic" else "codex-subscription-client-unmetered-2026-09-14"),
             output_schema=ADMISSION_SCHEMA,
             workspace_root=allocated.configured_root,
         )
-        turn = executor.run(
-            prompt,
-            capture_name=f"20260914-wi022-ac3-admission/{family}.json",
-            study_id="WI022-AC3-admission",
-            case_id=f"probe-{family}",
-            condition="admission",
-            fixture="disposable-admission-fixture",
-            fixture_version="wi022-admission-fixture.v1",
-            repetition=0,
-            seed=0,
-            workspace_identity={"fixture": "admission-fixture.txt", "fixture_sha256": fixture_digest},
-            auxiliary_calls=(),
-        )
+        try:
+            turn = executor.run(
+                prompt,
+                capture_name=f"20260914-wi022-ac3-admission-v4/{family}.json",
+                study_id="WI022-AC3-admission",
+                case_id=f"probe-{family}",
+                condition="admission",
+                fixture="disposable-admission-fixture",
+                fixture_version="wi022-admission-fixture.v1",
+                repetition=0,
+                seed=0,
+                workspace_identity={"fixture": "admission-fixture.txt", "fixture_sha256": fixture_digest},
+                auxiliary_calls=(),
+            )
+        except EmpiricalContractError as exc:
+            return {
+                "family": family,
+                "model": asdict(identity),
+                "probe_version": "wi022-ac3-admission.v1",
+                "executor_version": EMPIRICAL_EXECUTOR_VERSION,
+                "result": "FAIL",
+                "failure_class": "empirical-transport-or-contract",
+                "failure": str(exc),
+                "attempts": 1,
+                "capture_ref": None,
+                "capture_digest": None,
+            }
         result_file = workspace / "admission-result.txt"
         turn_completed_monotonic = time.monotonic()
         if turn.turn_completed_elapsed_ms is not None:
@@ -127,8 +141,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run one non-benchmark WI022 AC-3 admission probe")
     parser.add_argument("--family", choices=sorted(FAMILIES), required=True)
     parser.add_argument("--capture-root", default="evidence/captures")
+    parser.add_argument("--report-out", default=None)
     args = parser.parse_args(argv)
     report = run_probe(args.family, capture_root=args.capture_root)
+    if args.report_out:
+        report_path = Path(args.report_out)
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if report["result"] == "PASS" else 1
 
